@@ -1,6 +1,8 @@
 from aiogram import Bot, Dispatcher, executor, types
 import markups as nav
+import location as lc
 
+#555bc789-2362-40fb-bfbf-c7c01038f989 ключ яндекса
 TOKEN = '6164789985:AAERnbMba1dfJj20SJR4LWzfJFtlArE2uFw'
 
 bot = Bot(token=TOKEN)
@@ -19,21 +21,27 @@ async def command_start(message: types.Message):
         reply_markup=nav.mainMenu
     )
 
-
+@dp.message_handler(content_types=['location'])
+async def handle_location(message:types.Message):
+    lat = message.location.latitude
+    lon = message.location.longitude
+    coords = f"{lon},{lat}"
+    adress = lc.get_address_from_coords(coords)
+    await message.answer(adress)
 @dp.message_handler()
 async def bot_message(message: types.Message):
     global state
     if state == 'start':
         if message.text == 'Ближайшая тусовка':
             state = 'nearest'
-            await bot.send_message(
-                message.from_user.id,
-                'Кинь мне местоположение и я подскажу тебя, что есть рядом'
-            )
             await message.answer(
-                'Туса у Глебовича\nАдрес: Лыткарино\nТам будет клеавый дед, дешевое бухло и вид на Москву реку'
+                'Кинь мне местоположение и я подскажу тебе, что есть рядом',
+                reply_markup=nav.location
             )
-            await message.answer_location(55.589387, 37.886200, reply_markup=nav.back)
+            # await message.answer(
+            #     'Туса у Глебовича\nАдрес: Лыткарино\nТам будет клеавый дед, дешевое бухло и вид на Москву реку'
+            # )
+            # await message.answer_location(55.589387, 37.886200, reply_markup=nav.back)
 
         elif message.text == 'Топ':
             state = 'top'
@@ -60,3 +68,4 @@ async def bot_message(message: types.Message):
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
+

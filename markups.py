@@ -13,4 +13,6 @@ mainMenu = ReplyKeyboardMarkup(resize_keyboard=True).add(btnNearest, btnTop, btn
 btnReturn = KeyboardButton('Назад')
 back = ReplyKeyboardMarkup(resize_keyboard=True).add(btnReturn)
 
-
+# --- Location ---
+btnLocation = KeyboardButton('Отправить локацию', request_location=True)
+location = ReplyKeyboardMarkup(resize_keyboard=True).add(btnLocation)
