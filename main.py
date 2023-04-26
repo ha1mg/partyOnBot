@@ -1,6 +1,8 @@
 from aiogram import Bot, Dispatcher, executor, types
 import markups as nav
 import location as lc
+import bd_places as dpl
+
 
 #555bc789-2362-40fb-bfbf-c7c01038f989 ключ яндекса
 TOKEN = '6164789985:AAERnbMba1dfJj20SJR4LWzfJFtlArE2uFw'
@@ -23,11 +25,15 @@ async def command_start(message: types.Message):
 
 @dp.message_handler(content_types=['location'])
 async def handle_location(message:types.Message):
-    lat = message.location.latitude
-    lon = message.location.longitude
-    coords = f"{lon},{lat}"
-    adress = lc.get_address_from_coords(coords)
-    await message.answer(adress)
+    global state
+    if state == 'nearest':
+        lat = message.location.latitude
+        lon = message.location.longitude
+        coords = f"{lon},{lat}"
+        adress = lc.get_address_from_coords(coords)
+        await message.answer(adress)
+
+        await message.answer(dpl.nearest(lon, lat))
 @dp.message_handler()
 async def bot_message(message: types.Message):
     global state
@@ -38,6 +44,8 @@ async def bot_message(message: types.Message):
                 'Кинь мне местоположение и я подскажу тебе, что есть рядом',
                 reply_markup=nav.location
             )
+            # for i in range(len):
+
             # await message.answer(
             #     'Туса у Глебовича\nАдрес: Лыткарино\nТам будет клеавый дед, дешевое бухло и вид на Москву реку'
             # )
