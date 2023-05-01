@@ -12,6 +12,8 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 
 state = ''
+lon = 0.0
+lot = 0.0
 
 
 @dp.message_handler(commands=['start'])
@@ -42,7 +44,7 @@ async def bot_message(message: types.Message):
     global state
     if state == 'start':
         if message.text == 'Ближайшая тусовка':
-            state = 'nearest'
+            state = 'nearest1'
             await message.answer(
                 'Кинь мне местоположение и я подскажу тебе, что есть рядом',
                 reply_markup=nav.location
