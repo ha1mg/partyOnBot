@@ -1,8 +1,9 @@
 from aiogram import Bot, Dispatcher, executor, types
+
+import bd.bd_posts
 import markups as nav
 import location as lc
-import bd_places as dpl
-
+from bd import bd_posts, bd_users, bd_favourite
 
 #555bc789-2362-40fb-bfbf-c7c01038f989 ключ яндекса
 TOKEN = '6164789985:AAERnbMba1dfJj20SJR4LWzfJFtlArE2uFw'
@@ -22,6 +23,8 @@ async def command_start(message: types.Message):
         'Привет {0.first_name}\nЯ бот PartyOn и я помогу тебе провести эти выходные ахуенно'.format(message.from_user),
         reply_markup=nav.mainMenu
     )
+    # if bd_users.isExist()
+    bd_users.insert(message.from_user.id, str(message.from_user.first_name))
 
 @dp.message_handler(content_types=['location'])
 async def handle_location(message:types.Message):
@@ -33,7 +36,7 @@ async def handle_location(message:types.Message):
         adress = lc.get_address_from_coords(coords)
         await message.answer(adress)
 
-        await message.answer(dpl.nearest(lon, lat))
+        await message.answer(bd_posts.nearest(lon, lat))
 @dp.message_handler()
 async def bot_message(message: types.Message):
     global state
@@ -44,12 +47,6 @@ async def bot_message(message: types.Message):
                 'Кинь мне местоположение и я подскажу тебе, что есть рядом',
                 reply_markup=nav.location
             )
-            # for i in range(len):
-
-            # await message.answer(
-            #     'Туса у Глебовича\nАдрес: Лыткарино\nТам будет клеавый дед, дешевое бухло и вид на Москву реку'
-            # )
-            # await message.answer_location(55.589387, 37.886200, reply_markup=nav.back)
 
         elif message.text == 'Топ':
             state = 'top'
