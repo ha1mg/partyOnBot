@@ -1,9 +1,9 @@
 from aiogram import Bot, Dispatcher, executor, types
 
-import bd.bd_posts
+import bd.db_posts
 import markups as nav
 import location as lc
-from bd import bd_posts, bd_users, bd_favourite
+from bd import db_posts, db_users, db_favourite
 
 #555bc789-2362-40fb-bfbf-c7c01038f989 ключ яндекса
 TOKEN = '6164789985:AAERnbMba1dfJj20SJR4LWzfJFtlArE2uFw'
