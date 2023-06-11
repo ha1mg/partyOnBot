@@ -1,9 +1,8 @@
 from aiogram import Bot, Dispatcher, executor, types
 
-import bd.db_posts
 import markups as nav
 import location as lc
-from bd import db_posts, db_users, db_favourite
+from bd import db_posts, db_users, db_favourite, db_top
 
 #555bc789-2362-40fb-bfbf-c7c01038f989 ключ яндекса
 TOKEN = '6164789985:AAERnbMba1dfJj20SJR4LWzfJFtlArE2uFw'
@@ -43,19 +42,20 @@ async def bot_message(message: types.Message):
     global state
     if state == 'start':
         if message.text == 'Ближайшая тусовка':
-            state = 'nearest1'
+            state = 'nearest'
             await message.answer(
                 'Кинь мне местоположение и я подскажу тебе, что есть рядом',
                 reply_markup=nav.location
             )
-
         elif message.text == 'Топ':
             state = 'top'
-            await bot.send_message(
-                message.from_user.id,
-                'Топ организаций:\n1. Тусы у Глебовича.\n2.СытоПьяно\n3.(Рекламное место)',
-                reply_markup=nav.back
-            )
+            data = db_top.fetch()
+            for post_id in data:
+                await bot.send_message(
+                    message.from_user.id,
+                    db_posts.fetch(post_id)[1],
+                    reply_markup=nav.back
+                )
         elif message.text == 'Избранное':
             state = 'favoirite'
             await bot.send_message(

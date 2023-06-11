@@ -15,10 +15,13 @@ def insert(id, name = "-"):
     connection.commit()
     cur.close()
 
-def isExist(user_id):
-    connection = sqlite3.connect('users.db')
+def isExist(id_user):
+    connection = sqlite3.connect('favourite.db')
     cur = connection.cursor()
-    cur.execute("SELECT * FROM users WHERE id = (?)", (user_id))
+    if cur.fetchone(id_user):
+        return True
+    else:
+        return False
     connection.commit()
     cur.close()
 

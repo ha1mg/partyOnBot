@@ -15,12 +15,3 @@ def insert(id_post, id_user):
     connection.commit()
     cur.close()
 
-def isExist(id_user):
-    connection = sqlite3.connect('favourite.db')
-    cur = connection.cursor()
-    if cur.fetchone(id_user)==None:
-        return False
-    else:
-        return True
-    connection.commit()
-    cur.close()
