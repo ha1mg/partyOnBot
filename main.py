@@ -9,15 +9,13 @@ TOKEN = '6164789985:AAERnbMba1dfJj20SJR4LWzfJFtlArE2uFw'
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 
-state = ''
 lon = 0.0
 lat = 0.0
 near_loc = []
 
 @dp.message_handler(commands=['start'])
 async def command_start(message: types.Message):
-    global state
-    state = 'start'
+    db_users.edit_state('start', db_users.fetch_state(message.from_user.id))
     await bot.send_message(
         message.from_user.id,
         'Привет {0.first_name}\nЯ бот PartyOn и я помогу тебе провести эти выходные ахуенно'.format(message.from_user),
@@ -28,9 +26,8 @@ async def command_start(message: types.Message):
 
 @dp.message_handler(content_types=['location'])
 async def handle_location(message:types.Message):
-    global state
     global near_loc
-    if state == 'nearest':
+    if db_users.fetch_state(message.from_user.id) == 'nearest':
         lat = message.location.latitude
         lon = message.location.longitude
         coords = f"{lon},{lat}"
@@ -50,16 +47,15 @@ async def handle_location(message:types.Message):
 
 @dp.message_handler()
 async def bot_message(message: types.Message):
-    global state
-    if state == 'start':
+    if db_users.fetch_state(message.from_user.id) == 'start':
         if message.text == 'Ближайшая тусовка':
-            state = 'nearest'
+            db_users.edit_state('nearest', message.from_user.id)
             await message.answer(
                 'Кинь мне местоположение и я подскажу тебе, что есть рядом',
                 reply_markup=nav.location
             )
         elif message.text == 'Топ':
-            state = 'top'
+            db_users.edit_state('top', message.from_user.id)
             data = db_top.fetch()
             for post_id in data:
                 await bot.send_message(
@@ -68,13 +64,13 @@ async def bot_message(message: types.Message):
                     reply_markup=nav.back
                 )
         elif message.text == 'Избранное':
-            state = 'favoirite'
+            db_users.edit_state('favoirite', message.from_user.id)
             await bot.send_message(
                 message.from_user.id,
                 '1. Тусы у Глебовича.\n',
                 reply_markup=nav.back
             )
-    elif state == 'nearest':
+    elif db_users.fetch_state(message.from_user.id) == 'nearest':
         global near_loc
         if message.text == 'Другая':
             db_users.increment_iter(message.from_user.id)
@@ -86,15 +82,15 @@ async def bot_message(message: types.Message):
                 reply_markup=nav.posts
             )
         elif message.text == 'Назад':
-            state = 'start'
+            db_users.edit_state('start', message.from_user.id)
             await bot.send_message(
                 message.from_user.id,
                 'Выбери дальнейшее действие',
                 reply_markup=nav.mainMenu
             )
-    elif state == 'top' or state == 'favoirite':
+    elif db_users.fetch_state(message.from_user.id) == 'top' or db_users.fetch_state(message.from_user.id) == 'favoirite':
         if message.text == 'Назад':
-            state = 'start'
+            db_users.edit_state('start', message.from_user.id)
             await bot.send_message(
                 message.from_user.id,
                 'Выбери дальнейшее действие',
