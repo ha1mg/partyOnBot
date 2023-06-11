@@ -2,28 +2,26 @@ import sqlite3
 
 connection = sqlite3.connect('users.db')
 cur = connection.cursor()
-try:
-    cur.execute("SELECT * FROM users")
-    data = cur.fetchall()
-    print("БД users уже существует")
-except:
-    cur.execute('''CREATE TABLE users (id INT NOT NULL PRIMARY KEY, name TEXT NOT NULL);''')
-    print("БД users создана")
+
+cur.execute('''CREATE TABLE IF NOT EXISTS users (id INT NOT NULL PRIMARY KEY, name TEXT NOT NULL);''')
 
 connection.commit()
 cur.close()
 
 def insert(id, name = "-"):
-    connection = sqlite3.connect('users.db')
+    connection = sqlite3.connect('bd/users.db')
     cur = connection.cursor()
     cur.execute("INSERT INTO users (id, name) VALUES (?, ?)", (id, name))
     connection.commit()
     cur.close()
 
-def isExist(user_id):
-    connection = sqlite3.connect('users.db')
+def isExist(id_user):
+    connection = sqlite3.connect('favourite.db')
     cur = connection.cursor()
-    cur.execute("SELECT * FROM users WHERE id = (?)", (user_id))
+    if cur.fetchone(id_user):
+        return True
+    else:
+        return False
     connection.commit()
     cur.close()
 

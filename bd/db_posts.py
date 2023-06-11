@@ -2,14 +2,9 @@ import sqlite3
 
 connection = sqlite3.connect('posts.db')
 cur = connection.cursor()
-try:
-    cur.execute("SELECT * FROM posts")
-    data = cur.fetchall()
-    print("БД places уже существует")
-except:
-    cur.execute('''CREATE TABLE posts (id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,
-                                               coords_x FLOAT NOT NULL,coords_y FLOAT NOT NULL);''') #IF NOT EXIST
-    print("БД places создана")
+
+cur.execute('''CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY AUTOINCREMENT,organization TEXT NOT NULL,
+                                    discription TEXT NOT NULL, coords_x FLOAT NOT NULL,coords_y FLOAT NOT NULL);''')
 
 connection.commit()
 cur.close()
@@ -17,11 +12,11 @@ cur.close()
 # cur.execute("INSERT INTO places (name, coords_x, coords_y) VALUES (?, ?, ?)", ('Туса Глебовича', 55.589356, 37.886205))
 # cur.execute("INSERT INTO places (name, coords_x, coords_y) VALUES (?, ?, ?)", ('Туса Сергеевича', 55.746436, 38.009049))
 
-def insert(name, x, y):
+def insert(organization, discription, x, y):
     connection = sqlite3.connect('posts.db')
     cur = connection.cursor()
-    cur.execute("INSERT INTO posts (name, coords_x, coords_y) VALUES (?, ?, ?)",
-                (name, x, y))
+    cur.execute("INSERT INTO posts (organization, discription, coords_x, coords_y) VALUES (?, ?, ?)",
+                (organization, discription, x, y))
     connection.commit()
     cur.close()
 

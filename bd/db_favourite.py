@@ -2,13 +2,8 @@ import sqlite3
 
 connection = sqlite3.connect('favourite.db')
 cur = connection.cursor()
-try:
-    cur.execute("SELECT * FROM favourite")
-    data = cur.fetchall()
-    print("БД favourite уже существует")
-except:
-    cur.execute('''CREATE TABLE favourite (id_post INT NOT NULL, id_user INT NOT NULL);''')
-    print("БД favourite создана")
+
+cur.execute('''CREATE TABLE IF NOT EXISTS favourite (organization INT NOT NULL, user_id INT NOT NULL);''')
 
 connection.commit()
 cur.close()
@@ -20,12 +15,13 @@ def insert(id_post, id_user):
     connection.commit()
     cur.close()
 
-def isExist(id_user):
-    connection = sqlite3.connect('favourite.db')
+def fetch(user_id):
+    connection = sqlite3.connect()
     cur = connection.cursor()
-    if cur.fetchone(id_user)==None:
-        return False
-    else:
-        return True
+    cur.execute("SELECT * FROM posts WHERE user_id = (id) VALUES (?)", (user_id))
+    data = cur.fetchall()
+    for i in data:
+        data.pop(2)
     connection.commit()
     cur.close()
+    return data
