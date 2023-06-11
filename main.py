@@ -4,7 +4,6 @@ import markups as nav
 import location as lc
 from bd import db_posts, db_users, db_favourite, db_top
 
-#555bc789-2362-40fb-bfbf-c7c01038f989 ключ яндекса
 TOKEN = '6164789985:AAERnbMba1dfJj20SJR4LWzfJFtlArE2uFw'
 
 bot = Bot(token=TOKEN)
