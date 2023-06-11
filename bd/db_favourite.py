@@ -1,22 +1,23 @@
 import sqlite3
 
-connection = sqlite3.connect('favourite.db')
+directory = r'D:\Projects\aiogramBot\bd\favourite.db'
+connection = sqlite3.connect(directory)
 cur = connection.cursor()
 
-cur.execute('''CREATE TABLE IF NOT EXISTS favourite (organization INT NOT NULL, user_id INT NOT NULL);''')
+cur.execute('''CREATE TABLE IF NOT EXISTS favourite (organization INTEGER NOT NULL, user_id INTEGER NOT NULL);''')
 
 connection.commit()
 cur.close()
 
 def insert(id_post, id_user):
-    connection = sqlite3.connect('favourite.db')
+    connection = sqlite3.connect(directory)
     cur = connection.cursor()
     cur.execute("INSERT INTO favourite (id, name) VALUES (?, ?)", (id_post, id_user))
     connection.commit()
     cur.close()
 
 def fetch(user_id):
-    connection = sqlite3.connect()
+    connection = sqlite3.connect(directory)
     cur = connection.cursor()
     cur.execute("SELECT * FROM posts WHERE user_id = (id) VALUES (?)", (user_id))
     data = cur.fetchall()

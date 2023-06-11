@@ -1,18 +1,22 @@
 import sqlite3
 
-connection = sqlite3.connect('op.db')
+directory = r'D:\Projects\aiogramBot\bd\top.db'
+connection = sqlite3.connect(directory)
 cur = connection.cursor()
 
-cur.execute('''CREATE TABLE IF NOT EXISTS top (id_post INT NOT NULL);''')
+cur.execute('''CREATE TABLE IF NOT EXISTS top (id_post INTEGER NOT NULL);''')
+
+# cur.execute("INSERT INTO top (id_post) VALUES (?)", (1,))
+# cur.execute("INSERT INTO top (id_post) VALUES (?)", (2,))
+# cur.execute("INSERT INTO top (id_post) VALUES (?)", (3,))
 
 connection.commit()
 cur.close()
 
 def fetch():
-    connection = sqlite3.connect()
+    connection = sqlite3.connect(directory)
     cur = connection.cursor()
-    cur.execute("SELECT * FROM top")
-    data = cur.fetchmany(cur.arraysize)
+    data = cur.execute("SELECT id_post FROM top").fetchall()
     connection.commit()
     cur.close()
     return data

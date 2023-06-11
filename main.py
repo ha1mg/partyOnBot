@@ -13,7 +13,6 @@ state = ''
 lon = 0.0
 lat = 0.0
 near_loc = []
-i = 0
 
 @dp.message_handler(commands=['start'])
 async def command_start(message: types.Message):
@@ -30,6 +29,7 @@ async def command_start(message: types.Message):
 @dp.message_handler(content_types=['location'])
 async def handle_location(message:types.Message):
     global state
+    global near_loc
     if state == 'nearest':
         lat = message.location.latitude
         lon = message.location.longitude
@@ -38,9 +38,11 @@ async def handle_location(message:types.Message):
         await message.answer(address)
         near_loc = db_posts.nearest(lon, lat)
 
+        db_users.reset_iter(message.from_user.id)
+
         await bot.send_message(
             message.from_user.id,
-            db_posts.fetch(near_loc[i])[1],
+            db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)][0])[1],
             reply_markup=nav.posts
         )
 
@@ -62,7 +64,7 @@ async def bot_message(message: types.Message):
             for post_id in data:
                 await bot.send_message(
                     message.from_user.id,
-                    db_posts.fetch(post_id)[1],
+                    db_posts.fetch(post_id[0])[1],
                     reply_markup=nav.back
                 )
         elif message.text == 'Избранное':
@@ -73,20 +75,24 @@ async def bot_message(message: types.Message):
                 reply_markup=nav.back
             )
     elif state == 'nearest':
-        global i
         global near_loc
         if message.text == 'Другая':
-            i+=1
+            db_users.increment_iter(message.from_user.id)
+            if db_users.fetch_iter(message.from_user.id) >= db_posts.size():
+                db_users.reset_iter(message.from_user.id)
             await bot.send_message(
                 message.from_user.id,
-                db_posts.fetch(near_loc[i])[1],
+                db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)][0])[1],
                 reply_markup=nav.posts
             )
-
-
-
-
-    elif state == 'nearest' or state == 'top' or state == 'favoirite':
+        elif message.text == 'Назад':
+            state = 'start'
+            await bot.send_message(
+                message.from_user.id,
+                'Выбери дальнейшее действие',
+                reply_markup=nav.mainMenu
+            )
+    elif state == 'top' or state == 'favoirite':
         if message.text == 'Назад':
             state = 'start'
             await bot.send_message(

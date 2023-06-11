@@ -15,6 +15,6 @@ btnLocation = KeyboardButton('Отправить локацию', request_locati
 location = ReplyKeyboardMarkup(resize_keyboard=True).add(btnLocation)
 
 # --- Top ---
-btnNext = KeyboardButton('Другая', request_location=True)
-btnLike = KeyboardButton('В любимое', request_location=True)
-posts = ReplyKeyboardMarkup(resize_keyboard=True).add(btnNext, btnLike)
+btnNext = KeyboardButton('Другая')
+btnLike = KeyboardButton('В любимое')
+posts = ReplyKeyboardMarkup(resize_keyboard=True).add(btnNext, btnLike, btnReturn)
