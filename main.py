@@ -25,8 +25,8 @@ async def command_start(message: types.Message):
         'Привет {0.first_name}\nЯ бот PartyOn и я помогу тебе провести эти выходные ахуенно'.format(message.from_user),
         reply_markup=nav.mainMenu
     )
-    # if bd_users.isExist()
-    bd_users.insert(message.from_user.id, str(message.from_user.first_name))
+    if db_users.isExist(message.from_user.id) == False:
+        db_users.insert(message.from_user.id, str(message.from_user.first_name))
 
 @dp.message_handler(content_types=['location'])
 async def handle_location(message:types.Message):
@@ -37,8 +37,7 @@ async def handle_location(message:types.Message):
         coords = f"{lon},{lat}"
         adress = lc.get_address_from_coords(coords)
         await message.answer(adress)
-
-        await message.answer(bd_posts.nearest(lon, lat))
+        await message.answer(db_posts.nearest(lon, lat))
 @dp.message_handler()
 async def bot_message(message: types.Message):
     global state

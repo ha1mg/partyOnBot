@@ -8,7 +8,7 @@ try:
     print("БД places уже существует")
 except:
     cur.execute('''CREATE TABLE posts (id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,
-                                               coords_x FLOAT NOT NULL,coords_y FLOAT NOT NULL);''')
+                                               coords_x FLOAT NOT NULL,coords_y FLOAT NOT NULL);''') #IF NOT EXIST
     print("БД places создана")
 
 connection.commit()
@@ -16,6 +16,7 @@ cur.close()
 
 # cur.execute("INSERT INTO places (name, coords_x, coords_y) VALUES (?, ?, ?)", ('Туса Глебовича', 55.589356, 37.886205))
 # cur.execute("INSERT INTO places (name, coords_x, coords_y) VALUES (?, ?, ?)", ('Туса Сергеевича', 55.746436, 38.009049))
+
 def insert(name, x, y):
     connection = sqlite3.connect('posts.db')
     cur = connection.cursor()
