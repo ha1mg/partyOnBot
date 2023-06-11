@@ -13,8 +13,9 @@ dp = Dispatcher(bot)
 
 state = ''
 lon = 0.0
-lot = 0.0
-
+lat = 0.0
+near_loc = []
+i = 0
 
 @dp.message_handler(commands=['start'])
 async def command_start(message: types.Message):
@@ -35,19 +36,27 @@ async def handle_location(message:types.Message):
         lat = message.location.latitude
         lon = message.location.longitude
         coords = f"{lon},{lat}"
-        adress = lc.get_address_from_coords(coords)
-        await message.answer(adress)
-        await message.answer(db_posts.nearest(lon, lat))
+        address = lc.get_address_from_coords(coords)
+        await message.answer(address)
+        near_loc = db_posts.nearest(lon, lat)
+
+        await bot.send_message(
+            message.from_user.id,
+            db_posts.fetch(near_loc[i])[1],
+            reply_markup=nav.posts
+        )
+
+
+
 @dp.message_handler()
 async def bot_message(message: types.Message):
     global state
     if state == 'start':
         if message.text == 'Ближайшая тусовка':
-            state = 'nearest1'
+            state = 'nearest'
             await message.answer(
                 'Кинь мне местоположение и я подскажу тебе, что есть рядом',
-                reply_markup=nav.location
-            )
+                reply_markup=nav.location)
 
         elif message.text == 'Топ':
             state = 'top'
@@ -63,6 +72,20 @@ async def bot_message(message: types.Message):
                 '1. Тусы у Глебовича.\n',
                 reply_markup=nav.back
             )
+    elif state == 'nearest':
+        global i
+        global near_loc
+        if message.text == 'Другая':
+            i+=1
+            await bot.send_message(
+                message.from_user.id,
+                db_posts.fetch(near_loc[i])[1],
+                reply_markup=nav.posts
+            )
+
+
+
+
     elif state == 'nearest' or state == 'top' or state == 'favoirite':
         if message.text == 'Назад':
             state = 'start'
