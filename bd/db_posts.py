@@ -2,14 +2,9 @@ import sqlite3
 
 connection = sqlite3.connect('posts.db')
 cur = connection.cursor()
-try:
-    cur.execute("SELECT * FROM posts")
-    data = cur.fetchall()
-    print("БД places уже существует")
-except:
-    cur.execute('''CREATE TABLE posts (id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,
-                                               coords_x FLOAT NOT NULL,coords_y FLOAT NOT NULL);''') #IF NOT EXIST
-    print("БД places создана")
+
+cur.execute('''CREATE TABLE IF NOT EXIST posts (id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,
+                                           coords_x FLOAT NOT NULL,coords_y FLOAT NOT NULL);''')
 
 connection.commit()
 cur.close()

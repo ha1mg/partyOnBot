@@ -2,13 +2,8 @@ import sqlite3
 
 connection = sqlite3.connect('favourite.db')
 cur = connection.cursor()
-try:
-    cur.execute("SELECT * FROM favourite")
-    data = cur.fetchall()
-    print("БД favourite уже существует")
-except:
-    cur.execute('''CREATE TABLE favourite (id_post INT NOT NULL, id_user INT NOT NULL);''')
-    print("БД favourite создана")
+
+cur.execute('''CREATE TABLE IF NOT EXIST favourite (id_post INT NOT NULL, id_user INT NOT NULL);''')
 
 connection.commit()
 cur.close()

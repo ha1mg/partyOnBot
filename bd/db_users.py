@@ -2,13 +2,8 @@ import sqlite3
 
 connection = sqlite3.connect('users.db')
 cur = connection.cursor()
-try:
-    cur.execute("SELECT * FROM users")
-    data = cur.fetchall()
-    print("БД users уже существует")
-except:
-    cur.execute('''CREATE TABLE users (id INT NOT NULL PRIMARY KEY, name TEXT NOT NULL);''')
-    print("БД users создана")
+
+cur.execute('''CREATE TABLE IF NOT EXIST users (id INT NOT NULL PRIMARY KEY, name TEXT NOT NULL);''')
 
 connection.commit()
 cur.close()
