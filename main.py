@@ -9,13 +9,10 @@ TOKEN = '6164789985:AAERnbMba1dfJj20SJR4LWzfJFtlArE2uFw'
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 
-lon = 0.0
-lat = 0.0
 near_loc = []
-
 @dp.message_handler(commands=['start'])
 async def command_start(message: types.Message):
-    db_users.edit_state('start', db_users.fetch_state(message.from_user.id))
+    db_users.edit_state('start', message.from_user.id)
     await bot.send_message(
         message.from_user.id,
         'Привет {0.first_name}\nЯ бот PartyOn и я помогу тебе провести эти выходные ахуенно'.format(message.from_user),
@@ -30,10 +27,9 @@ async def handle_location(message:types.Message):
     if db_users.fetch_state(message.from_user.id) == 'nearest':
         lat = message.location.latitude
         lon = message.location.longitude
-        coords = f"{lon},{lat}"
-        address = lc.get_address_from_coords(coords)
+        near_loc = db_users.recording_coords(lon, lat, message.from_user.id)
+        address = lc.get_address_from_coords(lon, lat)
         await message.answer(address)
-        near_loc = db_posts.nearest(lon, lat)
 
         db_users.reset_iter(message.from_user.id)
 
@@ -42,8 +38,6 @@ async def handle_location(message:types.Message):
             db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)][0])[1],
             reply_markup=nav.posts
         )
-
-
 
 @dp.message_handler()
 async def bot_message(message: types.Message):
@@ -71,7 +65,6 @@ async def bot_message(message: types.Message):
                 reply_markup=nav.back
             )
     elif db_users.fetch_state(message.from_user.id) == 'nearest':
-        global near_loc
         if message.text == 'Другая':
             db_users.increment_iter(message.from_user.id)
             if db_users.fetch_iter(message.from_user.id) >= db_posts.size():

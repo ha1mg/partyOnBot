@@ -1,12 +1,12 @@
 import requests
 
-def get_address_from_coords(coords):
+def get_address_from_coords(lon, lat):
     PARAMS = {
         "apikey":"555bc789-2362-40fb-bfbf-c7c01038f989",
         "format":"json",
         "lang":"ru_RU",
         "kind":"house",
-        "geocode": coords
+        "geocode": f"{lon},{lat}"
     }
 
     #отправляем запрос по адресу геокодера.

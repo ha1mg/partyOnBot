@@ -1,4 +1,5 @@
 import sqlite3
+from bd import db_posts
 
 directory = r'D:\Projects\aiogramBot\bd\users.db'
 connection = sqlite3.connect(directory)
@@ -65,5 +66,11 @@ def edit_state(new_state, user_id):
     connection.commit()
     cur.close()
 
-def get_kords(user_id):
-    
+def recording_coords(lon, lat, user_id):
+    connection = sqlite3.connect(directory)
+    cur = connection.cursor()
+    cur.execute("UPDATE users SET lon = ?, lat = ? WHERE id = ?", (lon, lat, user_id))
+    sorted_dist = db_posts.nearest(lon, lat)
+    return(sorted_dist)
+    connection.commit()
+    cur.close()

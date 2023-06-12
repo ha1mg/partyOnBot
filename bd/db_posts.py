@@ -37,7 +37,6 @@ def fetch(post_id):
 def nearest(lon, lat):
     connection = sqlite3.connect(directory)
     cur = connection.cursor()
-
     data = cur.execute("SELECT id, coords_x, coords_y FROM posts").fetchall()
     data_dist = []
     for row in data:
