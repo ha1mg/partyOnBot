@@ -65,5 +65,3 @@ def edit_state(new_state, user_id):
     connection.commit()
     cur.close()
 
-def get_kords(user_id):
-    

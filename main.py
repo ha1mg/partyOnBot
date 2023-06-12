@@ -15,7 +15,7 @@ near_loc = []
 
 @dp.message_handler(commands=['start'])
 async def command_start(message: types.Message):
-    db_users.edit_state('start', db_users.fetch_state(message.from_user.id))
+    db_users.edit_state('start', message.from_user.id)
     await bot.send_message(
         message.from_user.id,
         'Привет {0.first_name}\nЯ бот PartyOn и я помогу тебе провести эти выходные ахуенно'.format(message.from_user),
@@ -65,11 +65,20 @@ async def bot_message(message: types.Message):
                 )
         elif message.text == 'Избранное':
             db_users.edit_state('favoirite', message.from_user.id)
-            await bot.send_message(
-                message.from_user.id,
-                '1. Тусы у Глебовича.\n',
-                reply_markup=nav.back
-            )
+            data = db_favourite.fetch(message.from_user.id)
+            if data:
+                for i in data:
+                    await bot.send_message(
+                        message.from_user.id,
+                        '{0}\n{1}'.format(db_posts.fetch_by_organization(i[0])[1], db_posts.fetch_by_organization(i[0])[2]),
+                        reply_markup=nav.back
+                )
+            else:
+                await bot.send_message(
+                    message.from_user.id,
+                    'Ты ещё ничего не добавил( Исправляйся!',
+                    reply_markup=nav.back
+                )
     elif db_users.fetch_state(message.from_user.id) == 'nearest':
         global near_loc
         if message.text == 'Другая':
@@ -80,6 +89,11 @@ async def bot_message(message: types.Message):
                 message.from_user.id,
                 db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)][0])[1],
                 reply_markup=nav.posts
+            )
+        elif message.text == 'В любимое':
+            db_favourite.insert(db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)][0])[1], message.from_user.id)
+            await message.answer(
+                'Отлично. Теперь можешь найти тусовки от этой организации в избраном'
             )
         elif message.text == 'Назад':
             db_users.edit_state('start', message.from_user.id)

@@ -34,6 +34,14 @@ def fetch(post_id):
     cur.close()
     return data
 
+def fetch_by_organization(org):
+    connection = sqlite3.connect(directory)
+    cur = connection.cursor()
+    data = cur.execute("SELECT * FROM posts WHERE organization = ?", (org,)).fetchone()
+    connection.commit()
+    cur.close()
+    return data
+
 def nearest(lon, lat):
     connection = sqlite3.connect(directory)
     cur = connection.cursor()
