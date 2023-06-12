@@ -84,10 +84,18 @@ async def bot_message(message: types.Message):
                 reply_markup=nav.posts
             )
         elif message.text == 'В любимое':
-            db_favourite.insert(db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)][0])[1], message.from_user.id)
-            await message.answer(
-                'Отлично. Теперь можешь найти тусовки от этой организации в избраном'
-            )
+            if db_favourite.isExist(db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)][0])[1], message.from_user.id) == False:
+                db_favourite.insert(db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)][0])[1],
+                                    message.from_user.id)
+                await message.answer(
+                    'Отлично. Теперь можешь найти тусовки от этой организации в избраном'
+                )
+            else:
+                await message.answer(
+                    'Уже добавлял ее, брат. Давай другую'
+                )
+
+
         elif message.text == 'Назад':
             db_users.edit_state('start', message.from_user.id)
             await bot.send_message(
