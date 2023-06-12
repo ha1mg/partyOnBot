@@ -19,10 +19,6 @@ def insert(organization, id_user):
 def fetch(user_id):
     connection = sqlite3.connect(directory)
     cur = connection.cursor()
-    cur.execute("SELECT * FROM favourite WHERE user_id = ?", (user_id,))
-    data = cur.fetchall()
-    for i in data:
-        data.pop(2)
+    return cur.execute("SELECT * FROM favourite WHERE user_id = ?", (user_id,)).fetchall()
     connection.commit()
     cur.close()
-    return data

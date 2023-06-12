@@ -5,7 +5,8 @@ directory = r'D:\Projects\aiogramBot\bd\users.db'
 connection = sqlite3.connect(directory)
 cur = connection.cursor()
 
-cur.execute('''CREATE TABLE IF NOT EXISTS users (id INTEGER NOT NULL PRIMARY KEY, name TEXT NOT NULL, iter INTEGER NOT NULL, state_name TEXT NOT NULL, lon REAL, lat REAL);''')#поменять name NOT NULL
+cur.execute('''CREATE TABLE IF NOT EXISTS users (id INTEGER NOT NULL PRIMARY KEY, name TEXT NOT NULL, 
+        iter INTEGER NOT NULL, state_name TEXT NOT NULL, lon REAL, lat REAL, sorted_distance TEXT);''')#поменять name NOT NULL
 
 connection.commit()
 cur.close()
@@ -69,8 +70,16 @@ def edit_state(new_state, user_id):
 def recording_coords(lon, lat, user_id):
     connection = sqlite3.connect(directory)
     cur = connection.cursor()
-    cur.execute("UPDATE users SET lon = ?, lat = ? WHERE id = ?", (lon, lat, user_id))
     sorted_dist = db_posts.nearest(lon, lat)
-    return(sorted_dist)
+    cur.execute("UPDATE users SET lon = ?, lat = ?, sorted_distance = ? WHERE id = ?", (lon, lat, sorted_dist, user_id))
+    connection.commit()
+    cur.close()
+
+def fetch_sorted_dist(user_id):
+    connection = sqlite3.connect(directory)
+    cur = connection.cursor()
+    data = cur.execute("SELECT sorted_distance FROM users WHERE id = ?", (user_id,)).fetchone()
+    print (data)
+    return data[0]
     connection.commit()
     cur.close()
