@@ -86,8 +86,8 @@ async def bot_message(message: types.Message):
                 reply_markup=nav.posts
             )
         elif message.text == 'В любимое':
-            if db_favourite.isExist(db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)][0])[1], message.from_user.id) == False:
-                db_favourite.insert(db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)][0])[1],
+            if db_favourite.isExist(db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[1], message.from_user.id) == False:
+                db_favourite.insert(db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[1],
                                     message.from_user.id)
                 await message.answer(
                     'Отлично. Теперь можешь найти тусовки от этой организации в избраном'
