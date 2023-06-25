@@ -1,13 +1,14 @@
 import requests
 
+
 from config import APIKEY
-def get_address_from_coords(lon, lat):
+def get_coords_from_address(address):
     PARAMS = {
         "apikey":APIKEY,
         "format":"json",
         "lang":"ru_RU",
         "kind":"house",
-        "geocode": f"{lon},{lat}"
+        "geocode": f"{address}"
     }
 
     #отправляем запрос по адресу геокодера.
@@ -16,7 +17,8 @@ def get_address_from_coords(lon, lat):
         #получаем данные
         json_data = r.json()
         #вытаскиваем из всего пришедшего json именно строку с полным адресом.
-        address_str = json_data["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]["metaDataProperty"]["GeocoderMetaData"]["AddressDetails"]["Country"]["AddressLine"]
-        return address_str
+        # location = json_data["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]["metaDataProperty"]["GeocoderMetaData"]["Point"]["pos"]
+        location = json_data['response']['GeoObjectCollection']["featureMember"][0]['GeoObject']['Point']['pos']
+        return location
     except Exception as e:
-        return "error"
+        return e

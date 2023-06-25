@@ -1,19 +1,20 @@
 import sqlite3
 
-directory = r'D:\Projects\aiogramBot\bd\posts.db'
+directory = r'D:\Projects\aiogramBot\db\posts.db'
 connection = sqlite3.connect(directory)
 cur = connection.cursor()
 
 cur.execute('''CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY AUTOINCREMENT,organization TEXT NOT NULL,
-                                    discription TEXT NOT NULL, coords_x FLOAT NOT NULL,coords_y FLOAT NOT NULL);''')
+                                    discription TEXT NOT NULL,address TEXT NOT NULL,lat FLOAT NOT NULL,lon FLOAT NOT NULL,data TEXT);''')
 # cur.execute("INSERT INTO posts (organization, discription, coords_x, coords_y) VALUES (?, ?, ?, ?)",
 #             ('Туса Глебовича',"Будет много Водки", 55.589356, 37.886205))
-# cur.execute("INSERT INTO posts (organization, discription, coords_x, coords_y) VALUES (?, ?, ?, ?)",
-#             ('Туса Сергеевича',"Вкусная еда, расстроенная гитара и выход на крышу (вход тоже через неё)",
-#              55.746436, 38.009049))
-# cur.execute("INSERT INTO posts (organization, discription, coords_x, coords_y) VALUES (?, ?, ?, ?)",
-#             ('Туса у Вовы',"Невероятная возможность оказаться в самом горячем и понастоящему ядерном месте в России",
-#              55.751426, 37.618879))
+
+#
+cur.execute('''INSERT INTO posts (organization,discription,address,lat,lon,data) VALUES
+            ('Туса Глебовича',"Будет много Водки","Московская область, Лыткарино, микрорайон 4А, 3",55.589356,37.886205,"25.06.2023"),
+            ('Железнодорожный Party',"Вкусная еда, расстроенная гитара и выход на крышу (вход тоже через неё)","МО, Балашиха, мкр. Саввино, ул. Калинина, 8",55.746436,38.009049,"26.06.2023"),
+            ('Туса у Вовы',"Невероятная возможность оказаться в самом горячем и по-настоящему ядерном месте в России","Кремль",55.751426,37.618879,"31.12.2023");
+            ''')
 
 connection.commit()
 cur.close()
@@ -21,7 +22,7 @@ cur.close()
 def insert(organization, discription, x, y):
     connection = sqlite3.connect(directory)
     cur = connection.cursor()
-    cur.execute("INSERT INTO posts (organization, discription, coords_x, coords_y) VALUES (?, ?, ?, ?)",
+    cur.execute("INSERT INTO posts (organization, discription, lat, lon) VALUES (?, ?, ?, ?)",
                 (organization, discription, x, y))
     connection.commit()
     cur.close()
@@ -45,7 +46,7 @@ def fetch_by_organization(org):
 def nearest(lon, lat):
     connection = sqlite3.connect(directory)
     cur = connection.cursor()
-    data = cur.execute("SELECT id, coords_x, coords_y FROM posts").fetchall()
+    data = cur.execute("SELECT id, lat, lon FROM posts").fetchall()
     data_dist = []
     for row in data:
         distance = (((row[1]) - lat) ** 2 + ((row[2]) - lon) ** 2) ** 0.5

@@ -10,14 +10,15 @@ btnFavourite = KeyboardButton('Избранное')
 mainMenu = ReplyKeyboardMarkup(resize_keyboard=True).add(btnNearest, btnTop, btnFavourite)
 
 # --- Return ---
-btnReturn = InlineKeyboardButton('Меню', callback_data='back')
-back = InlineKeyboardMarkup().add(btnReturn)
+btnReturn = KeyboardButton('Меню')
+back = ReplyKeyboardMarkup(resize_keyboard=True).add(btnReturn)
 
 # --- Location ---
 btnLocation = KeyboardButton('Отправить локацию', request_location=True)
-location = ReplyKeyboardMarkup(resize_keyboard=True).add(btnLocation)
+location = ReplyKeyboardMarkup(resize_keyboard=True).add(btnLocation, btnReturn)
 
 # --- Posts ---
 btnNext = InlineKeyboardButton('Другая', callback_data='next')
 btnLike = InlineKeyboardButton('В любимое', callback_data='favorite')
-posts = InlineKeyboardMarkup().add(btnNext, btnLike, btnReturn)
+posts = InlineKeyboardMarkup().add(btnNext, btnLike)
+

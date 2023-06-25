@@ -5,22 +5,12 @@ from config import TOKEN
 import markups as nav
 import location as lc
 from db import db_posts, db_users, db_favourite, db_top
+from messages import MESSAGES
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 
-@dp.callback_query_handler(Text('back'))
-async def process_callback_back(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id)
-    if db_users.fetch_state(callback_query.from_user.id) == 'nearest' or \
-            db_users.fetch_state(callback_query.from_user.id) == 'top' or \
-            db_users.fetch_state(callback_query.from_user.id) == 'favoirite':
-        db_users.edit_state('start', callback_query.from_user.id)
-        await bot.send_message(
-            callback_query.from_user.id,
-            'Выбери дальнейшее действие',
-            reply_markup=nav.mainMenu
-        )
+
 
 @dp.callback_query_handler(Text('next'))
 async def process_callback_next(callback_query: types.CallbackQuery):
@@ -34,11 +24,12 @@ async def process_callback_next(callback_query: types.CallbackQuery):
             callback_query.from_user.id,
             '{0}\n\n{1}'.format(db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[1],
                                 db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[2]),
-            reply_markup=nav.posts
+                                reply_markup=nav.back
         )
         await bot.send_location(callback_query.from_user.id,
                                 db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[3],
-                                db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[4])
+                                db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[4],
+                                reply_markup=nav.posts)
 
 @dp.callback_query_handler(Text('favorite'))
 async def process_callback_favorite(callback_query: types.CallbackQuery):
@@ -76,8 +67,8 @@ async def handle_location(message:types.Message):
         db_users.recording_coords(lon, lat, message.from_user.id)
         near_loc_str = db_users.fetch_sorted_dist(message.from_user.id)
         near_loc = [int(x) for x in near_loc_str.split(",")]
-        address = lc.get_address_from_coords(lon, lat)
-        await message.answer(address)
+        # address = lc.get_address_from_coords(lon, lat)
+        # await message.answer('Твой адрес:\n{0}'.format(address), reply_markup=types.ReplyKeyboardRemove())
 
         db_users.reset_iter(message.from_user.id)
 
@@ -86,10 +77,11 @@ async def handle_location(message:types.Message):
 
             '{0}\n\n{1}'.format(db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[1],
                                 db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[2]),
-            reply_markup=nav.posts
-        )
-        await bot.send_location(message.from_user.id, db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[3],
-                                db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[4])
+                                reply_markup=nav.back)
+        await bot.send_location(message.from_user.id,
+                                db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[3],
+                                db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[4],
+                                reply_markup=nav.posts)
 
 @dp.message_handler()
 async def bot_message(message: types.Message):
@@ -125,49 +117,14 @@ async def bot_message(message: types.Message):
                     'Ты ещё ничего не добавил( Исправляйся!',
                     reply_markup=nav.back
                 )
-    # elif db_users.fetch_state(message.from_user.id) == 'nearest':
-    #     near_loc_str = db_users.fetch_sorted_dist(message.from_user.id)
-    #     near_loc = [int(x) for x in near_loc_str.split(",")]
-    #     if message.text == 'Другая':
-    #         db_users.increment_iter(message.from_user.id)
-    #         if db_users.fetch_iter(message.from_user.id) >= db_posts.size():
-    #             db_users.reset_iter(message.from_user.id)
-    #         await bot.send_message(
-    #             message.from_user.id,
-    #             '{0}\n\n{1}'.format(db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[1], db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[2]),
-    #             reply_markup=nav.posts
-    #         )
-    #         await bot.send_location(message.from_user.id,
-    #                                 db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[3],
-    #                                 db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[4])
-    #     elif message.text == 'В любимое':
-    #         if db_favourite.isExist(db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[1], message.from_user.id) == False:
-    #             db_favourite.insert(db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[1],
-    #                                 message.from_user.id)
-    #             await message.answer(
-    #                 'Отлично. Теперь можешь найти тусовки от этой организации в избраном'
-    #             )
-    #         else:
-    #             await message.answer(
-    #                 'Уже добавлял ее, брат. Давай другую'
-    #             )
-
-
-        # elif message.text == 'Назад':
-        #     db_users.edit_state('start', message.from_user.id)
-        #     await bot.send_message(
-        #         message.from_user.id,
-        #         'Выбери дальнейшее действие',
-        #         reply_markup=nav.mainMenu
-        #     )
-    # elif db_users.fetch_state(message.from_user.id) == 'top' or db_users.fetch_state(message.from_user.id) == 'favoirite':
-    #     if message.text == 'Назад':
-    #         db_users.edit_state('start', message.from_user.id)
-    #         await bot.send_message(
-    #             message.from_user.id,
-    #             'Выбери дальнейшее действие',
-    #             reply_markup=nav.mainMenu
-    #         )
+    elif db_users.fetch_state(message.from_user.id) == 'top' or db_users.fetch_state(message.from_user.id) == 'favoirite' or db_users.fetch_state(message.from_user.id) == 'nearest':
+        if message.text == 'Меню':
+            db_users.edit_state('start', message.from_user.id)
+            await bot.send_message(
+                message.from_user.id,
+                'Выбери дальнейшее действие',
+                reply_markup=nav.mainMenu
+            )
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
