@@ -1,8 +1,9 @@
 import requests
 
+from config import APIKEY
 def get_address_from_coords(lon, lat):
     PARAMS = {
-        "apikey":"555bc789-2362-40fb-bfbf-c7c01038f989",
+        "apikey":APIKEY,
         "format":"json",
         "lang":"ru_RU",
         "kind":"house",
