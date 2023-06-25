@@ -30,6 +30,7 @@ async def process_callback_next(callback_query: types.CallbackQuery):
             reply_markup=nav.back,
             parse_mode="Markdown"
         )
+        await bot.send_photo(callback_query.from_user.id, db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[7])
         await bot.send_location(callback_query.from_user.id,
                                 db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[4],
                                 db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[5],
@@ -83,6 +84,8 @@ async def handle_location(message:types.Message):
                 db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[3]),
             reply_markup=nav.back,
             parse_mode="Markdown")
+        await bot.send_photo(message.from_user.id,
+                             db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[7])
         await bot.send_location(
             message.from_user.id,
             db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[4],

@@ -1,7 +1,7 @@
 import sqlite3
 from db import db_posts
 
-directory = r'D:\Projects\aiogramBot\db\users.db'
+directory = r'D:\PyProjects\aiogramBot\db\users.db'
 connection = sqlite3.connect(directory)
 cur = connection.cursor()
 

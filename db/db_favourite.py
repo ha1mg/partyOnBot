@@ -1,6 +1,6 @@
 import sqlite3
 
-directory = r'D:\Projects\aiogramBot\db\favourite.db'
+directory = r'D:\PyProjects\aiogramBot\db\favourite.db'
 connection = sqlite3.connect(directory)
 cur = connection.cursor()
 

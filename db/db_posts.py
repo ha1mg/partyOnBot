@@ -1,23 +1,52 @@
 import sqlite3
 
-directory = r'D:\Projects\aiogramBot\db\posts.db'
+directory = r'D:\PyProjects\aiogramBot\db\posts.db'
 connection = sqlite3.connect(directory)
 cur = connection.cursor()
 
 cur.execute('''CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY AUTOINCREMENT,organization TEXT NOT NULL,
-                                    discription TEXT NOT NULL,address TEXT NOT NULL,lat FLOAT NOT NULL,lon FLOAT NOT NULL,data TEXT);''')
+                                    discription TEXT NOT NULL,address TEXT NOT NULL,lat FLOAT NOT NULL,lon FLOAT NOT NULL,date TEXT, media BLOB);''')
 # cur.execute("INSERT INTO posts (organization, discription, coords_x, coords_y) VALUES (?, ?, ?, ?)",
 #             ('Туса Глебовича',"Будет много Водки", 55.589356, 37.886205))
+def convertToBinaryData(filename):
+    with open(filename, 'rb') as file:
+        blobData = file.read()
+    return blobData
 
-#
-cur.execute('''INSERT INTO posts (organization,discription,address,lat,lon,data) VALUES
-            ('*Туса Глебовича*',"Будет много Водки","_Московская область, Лыткарино, микрорайон 4А, 3_",55.589356,37.886205,"_25.06.2023_"),
-            ('*Железнодорожный Party*',"Вкусная еда, расстроенная гитара и выход на крышу (вход тоже через неё)","_МО, Балашиха, мкр. Саввино, ул. Калинина, 8_",55.746436,38.009049,"_26.06.2023_"),
-            ('*Туса у Вовы*',"Невероятная возможность оказаться в самом горячем и по-настоящему ядерном месте в России","_Кремль_",55.751426,37.618879,"_31.12.2023_");
-            ''')
+media_post_1 = convertToBinaryData(r'D:\PyProjects\aiogramBot\media\глеб1.jpg')
+media_post_2 = convertToBinaryData(r'D:\PyProjects\aiogramBot\media\сергей1.jpg')
+media_post_3 = convertToBinaryData(r'D:\PyProjects\aiogramBot\media\вова1.jpg')
+#cur.execute("INSERT INTO posts (organization,discription,address,lat,lon,date,media) VALUES (?, ?, ?, ?, ?, ?, ?)",
+#('Туса Глебовича',"Будет много Водки","Московская область, Лыткарино, микрорайон 4А, 3",55.589356,37.886205,"25.06.2023", media_post_1))
+cur.execute("INSERT INTO posts (organization,discription,address,lat,lon,date,media) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            ('Туса Глебовича',"Будет много Водки","Московская область, Лыткарино, микрорайон 4А, 3",55.589356,37.886205,"25.06.2023", media_post_1))
+cur.execute("INSERT INTO posts (organization,discription,address,lat,lon,date,media) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            ('Железнодорожный Party',"Вкусная еда, расстроенная гитара и выход на крышу (вход тоже через неё)","МО, Балашиха, мкр. Саввино, ул. Калинина, 8",55.746436,38.009049,"26.06.2023", media_post_2))
+cur.execute("INSERT INTO posts (organization,discription,address,lat,lon,date,media) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            ('Туса у Вовы',"Невероятная возможность оказаться в самом горячем и по-настоящему ядерном месте в России","Кремль",55.751426,37.618879,"31.12.2023", media_post_3))
 
 connection.commit()
 cur.close()
+
+# def insertBLOB(post, photo):
+#     try:
+#
+#         sqliteConnection = sqlite3.connect('posts.db')
+#         cur = sqliteConnection.cursor()
+#         sqlite_insert_blob_query = """ INSERT INTO posts
+#                                       (id, media) VALUES (?, ?)"""
+#         post_photo = convertToBinaryData(photo)
+#         data_tuple = (post, post_photo)
+#         cur.execute(sqlite_insert_blob_query, data_tuple)
+#         sqliteConnection.commit()
+#         cur.close()
+#     except sqlite3.Error as error:
+#         print("Failed to insert blob data into sqlite table", error)
+#
+#     finally:
+#         if sqliteConnection:
+#             sqliteConnection.close()
+#             print("the sqlite connection is closed")
 
 def insert(organization, discription, x, y):
     connection = sqlite3.connect(directory)
