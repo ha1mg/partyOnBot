@@ -36,6 +36,9 @@ async def process_callback_next(callback_query: types.CallbackQuery):
                                 db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[2]),
             reply_markup=nav.posts
         )
+        await bot.send_location(callback_query.from_user.id,
+                                db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[3],
+                                db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[4])
 
 @dp.callback_query_handler(Text('favorite'))
 async def process_callback_favorite(callback_query: types.CallbackQuery):
@@ -122,32 +125,32 @@ async def bot_message(message: types.Message):
                     'Ты ещё ничего не добавил( Исправляйся!',
                     reply_markup=nav.back
                 )
-    elif db_users.fetch_state(message.from_user.id) == 'nearest':
-        near_loc_str = db_users.fetch_sorted_dist(message.from_user.id)
-        near_loc = [int(x) for x in near_loc_str.split(",")]
-        if message.text == 'Другая':
-            db_users.increment_iter(message.from_user.id)
-            if db_users.fetch_iter(message.from_user.id) >= db_posts.size():
-                db_users.reset_iter(message.from_user.id)
-            await bot.send_message(
-                message.from_user.id,
-                '{0}\n\n{1}'.format(db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[1], db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[2]),
-                reply_markup=nav.posts
-            )
-            await bot.send_location(message.from_user.id,
-                                    db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[3],
-                                    db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[4])
-        elif message.text == 'В любимое':
-            if db_favourite.isExist(db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[1], message.from_user.id) == False:
-                db_favourite.insert(db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[1],
-                                    message.from_user.id)
-                await message.answer(
-                    'Отлично. Теперь можешь найти тусовки от этой организации в избраном'
-                )
-            else:
-                await message.answer(
-                    'Уже добавлял ее, брат. Давай другую'
-                )
+    # elif db_users.fetch_state(message.from_user.id) == 'nearest':
+    #     near_loc_str = db_users.fetch_sorted_dist(message.from_user.id)
+    #     near_loc = [int(x) for x in near_loc_str.split(",")]
+    #     if message.text == 'Другая':
+    #         db_users.increment_iter(message.from_user.id)
+    #         if db_users.fetch_iter(message.from_user.id) >= db_posts.size():
+    #             db_users.reset_iter(message.from_user.id)
+    #         await bot.send_message(
+    #             message.from_user.id,
+    #             '{0}\n\n{1}'.format(db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[1], db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[2]),
+    #             reply_markup=nav.posts
+    #         )
+    #         await bot.send_location(message.from_user.id,
+    #                                 db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[3],
+    #                                 db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[4])
+    #     elif message.text == 'В любимое':
+    #         if db_favourite.isExist(db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[1], message.from_user.id) == False:
+    #             db_favourite.insert(db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[1],
+    #                                 message.from_user.id)
+    #             await message.answer(
+    #                 'Отлично. Теперь можешь найти тусовки от этой организации в избраном'
+    #             )
+    #         else:
+    #             await message.answer(
+    #                 'Уже добавлял ее, брат. Давай другую'
+    #             )
 
 
         # elif message.text == 'Назад':
