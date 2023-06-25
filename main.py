@@ -4,7 +4,7 @@ from aiogram.dispatcher.filters import Text
 from config import TOKEN
 import markups as nav
 import location as lc
-from bd import db_posts, db_users, db_favourite, db_top
+from db import db_posts, db_users, db_favourite, db_top
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
