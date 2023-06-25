@@ -35,9 +35,13 @@ async def handle_location(message:types.Message):
 
         await bot.send_message(
             message.from_user.id,
-            '{0}\n\n{1}'.format(db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[1], db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[2]),
+
+            '{0}\n\n{1}'.format(db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[1],
+                                db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[2]),
             reply_markup=nav.posts
         )
+        await bot.send_location(message.from_user.id, db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[3],
+                                db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[4])
 
 @dp.message_handler()
 async def bot_message(message: types.Message):
@@ -85,6 +89,9 @@ async def bot_message(message: types.Message):
                 '{0}\n\n{1}'.format(db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[1], db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[2]),
                 reply_markup=nav.posts
             )
+            await bot.send_location(message.from_user.id,
+                                    db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[3],
+                                    db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[4])
         elif message.text == 'В любимое':
             if db_favourite.isExist(db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[1], message.from_user.id) == False:
                 db_favourite.insert(db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[1],
