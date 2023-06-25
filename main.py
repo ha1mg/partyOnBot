@@ -22,7 +22,7 @@ async def process_callback_next(callback_query: types.CallbackQuery):
             db_users.reset_iter(callback_query.from_user.id)
         await bot.send_message(
             callback_query.from_user.id,
-            '{0}\n\n{1}\n{2}\n\n{3}'.format(
+            '{0}\n{1}\n\n{2}\n\n{3}'.format(
                 db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[1],
                 db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[6],
                 db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[2],
@@ -76,7 +76,7 @@ async def handle_location(message:types.Message):
 
         await bot.send_message(
             message.from_user.id,
-            '{0}\n\n{1}\n{2}\n\n{3}'.format(
+            '{0}\n{1}\n\n{2}\n\n{3}'.format(
                 db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[1],
                 db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[6],
                 db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[2],
