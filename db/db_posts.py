@@ -1,6 +1,7 @@
 import sqlite3
+from config import DIRECTORY
 
-directory = r'D:\PyProjects\aiogramBot\db\posts.db'
+directory = r'{0}\posts.db'.format(DIRECTORY)
 connection = sqlite3.connect(directory)
 cur = connection.cursor()
 
@@ -13,17 +14,17 @@ def convertToBinaryData(filename):
         blobData = file.read()
     return blobData
 
-media_post_1 = convertToBinaryData(r'D:\PyProjects\aiogramBot\media\глеб1.jpg')
-media_post_2 = convertToBinaryData(r'D:\PyProjects\aiogramBot\media\сергей1.jpg')
-media_post_3 = convertToBinaryData(r'D:\PyProjects\aiogramBot\media\вова1.jpg')
+# media_post_1 = convertToBinaryData(r'D:\PyProjects\aiogramBot\media\глеб1.jpg')
+# media_post_2 = convertToBinaryData(r'D:\PyProjects\aiogramBot\media\сергей1.jpg')
+# media_post_3 = convertToBinaryData(r'D:\PyProjects\aiogramBot\media\вова1.jpg')
 #cur.execute("INSERT INTO posts (organization,discription,address,lat,lon,date,media) VALUES (?, ?, ?, ?, ?, ?, ?)",
 #('Туса Глебовича',"Будет много Водки","Московская область, Лыткарино, микрорайон 4А, 3",55.589356,37.886205,"25.06.2023", media_post_1))
-cur.execute("INSERT INTO posts (organization,discription,address,lat,lon,date,media) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            ('Туса Глебовича',"Будет много Водки","Московская область, Лыткарино, микрорайон 4А, 3",55.589356,37.886205,"25.06.2023", media_post_1))
-cur.execute("INSERT INTO posts (organization,discription,address,lat,lon,date,media) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            ('Железнодорожный Party',"Вкусная еда, расстроенная гитара и выход на крышу (вход тоже через неё)","МО, Балашиха, мкр. Саввино, ул. Калинина, 8",55.746436,38.009049,"26.06.2023", media_post_2))
-cur.execute("INSERT INTO posts (organization,discription,address,lat,lon,date,media) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            ('Туса у Вовы',"Невероятная возможность оказаться в самом горячем и по-настоящему ядерном месте в России","Кремль",55.751426,37.618879,"31.12.2023", media_post_3))
+# cur.execute("INSERT INTO posts (organization,discription,address,lat,lon,date,media) VALUES (?, ?, ?, ?, ?, ?, ?)",
+#             ('Туса Глебовича',"Будет много Водки","Московская область, Лыткарино, микрорайон 4А, 3",55.589356,37.886205,"25.06.2023", media_post_1))
+# cur.execute("INSERT INTO posts (organization,discription,address,lat,lon,date,media) VALUES (?, ?, ?, ?, ?, ?, ?)",
+#             ('Железнодорожный Party',"Вкусная еда, расстроенная гитара и выход на крышу (вход тоже через неё)","МО, Балашиха, мкр. Саввино, ул. Калинина, 8",55.746436,38.009049,"26.06.2023", media_post_2))
+# cur.execute("INSERT INTO posts (organization,discription,address,lat,lon,date,media) VALUES (?, ?, ?, ?, ?, ?, ?)",
+#             ('Туса у Вовы',"Невероятная возможность оказаться в самом горячем и по-настоящему ядерном месте в России","Кремль",55.751426,37.618879,"31.12.2023", media_post_3))
 
 connection.commit()
 cur.close()

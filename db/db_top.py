@@ -1,6 +1,7 @@
 import sqlite3
+from config import DIRECTORY
 
-directory = r'D:\PyProjects\aiogramBot\db\top.db'
+directory = r'{0}\top.db'.format(DIRECTORY)
 connection = sqlite3.connect(directory)
 cur = connection.cursor()
 
