@@ -1,5 +1,6 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 
+import config
 # inline_btn_1 = InlineKeyboardButton('Первая кнопка!', callback_data='button1')
 # inline_kb1 = InlineKeyboardMarkup().add(inline_btn_1)
 
@@ -22,3 +23,7 @@ btnNext = InlineKeyboardButton('Другая', callback_data='next')
 btnLike = InlineKeyboardButton('В любимое', callback_data='favorite')
 posts = InlineKeyboardMarkup().add(btnNext, btnLike)
 
+# --- Subscribes ---
+btnChanel1 = InlineKeyboardButton(text='Канал #1', url=config.channel_link)
+btnIsSubscribe = InlineKeyboardButton(text='Подписался!', callback_data='start')
+subscribes = InlineKeyboardMarkup(row_width=1).add(btnChanel1, btnIsSubscribe)
