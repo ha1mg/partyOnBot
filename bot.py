@@ -1,16 +1,14 @@
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.dispatcher.filters import Text
+from aiogram.types import InputFile
 
 from config import TOKEN
 import markups as nav
-import location as lc
 from db import db_posts, db_users, db_favourite, db_top
 from messages import MESSAGES
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
-
-
 
 @dp.callback_query_handler(Text('next'))
 async def process_callback_next(callback_query: types.CallbackQuery):
@@ -20,21 +18,11 @@ async def process_callback_next(callback_query: types.CallbackQuery):
         db_users.increment_iter(callback_query.from_user.id)
         if db_users.fetch_iter(callback_query.from_user.id) >= db_posts.size():
             db_users.reset_iter(callback_query.from_user.id)
-        await bot.send_message(
-            callback_query.from_user.id,
-            '{0}\n{1}\n\n{2}\n\n{3}'.format(
-                db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[1],
-                db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[6],
-                db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[2],
-                db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[3]),
-            reply_markup=nav.back,
-            parse_mode="Markdown"
-        )
-        await bot.send_photo(callback_query.from_user.id, db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[7])
-        await bot.send_location(callback_query.from_user.id,
-                                db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[4],
-                                db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[5],
-                                reply_markup=nav.posts)
+        data = db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])
+        await callback_query.answer_photo(
+            data[7], caption='*{0}*\n_{1}_\n\n{2}\n\n_{3}_'.format(data[1], data[2], data[3], data[4]),
+            reply_markup=nav.back, parse_mode="Markdown")
+        await bot.send_location(callback_query.from_user.id, data[5], data[6], reply_markup=nav.posts)
 
 @dp.callback_query_handler(Text('favorite'))
 async def process_callback_favorite(callback_query: types.CallbackQuery):
@@ -72,25 +60,14 @@ async def handle_location(message:types.Message):
         db_users.recording_coords(lon, lat, message.from_user.id)
         near_loc_str = db_users.fetch_sorted_dist(message.from_user.id)
         near_loc = [int(x) for x in near_loc_str.split(",")]
-
         db_users.reset_iter(message.from_user.id)
-
-        await bot.send_message(
-            message.from_user.id,
-            '{0}\n{1}\n\n{2}\n\n{3}'.format(
-                db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[1],
-                db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[6],
-                db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[2],
-                db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[3]),
-            reply_markup=nav.back,
-            parse_mode="Markdown")
-        await bot.send_photo(message.from_user.id,
-                             db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[7])
-        await bot.send_location(
-            message.from_user.id,
-            db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[4],
-            db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[5],
-            reply_markup=nav.posts)
+        data = db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])
+        with open(f'media/pics/{data[0]}.jpg', 'rb') as photo_file:
+            photo = InputFile(photo_file)
+        await message.answer_photo(
+                photo, caption='*{0}*\n_{1}_\n\n{2}\n\n_{3}_'.format(data[1], data[2], data[3], data[4]),
+                reply_markup=nav.back, parse_mode="Markdown")
+        await bot.send_location(message.from_user.id, data[5], data[6], reply_markup=nav.posts)
 
 @dp.message_handler()
 async def bot_message(message: types.Message):
@@ -135,6 +112,10 @@ async def bot_message(message: types.Message):
                 MESSAGES['menu'],
                 reply_markup=nav.mainMenu
             )
+
+@dp.message_handler()
+async def echo_message(msg: types.Message):
+    await bot.send_message(msg.from_user.id, msg.text)
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
