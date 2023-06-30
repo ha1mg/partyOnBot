@@ -50,6 +50,7 @@ async def bot_message(message: types.Message, state: FSMContext):
 @dp.callback_query_handler(Text('save'), state=ManagerState.media)
 async def process_callback_save(callback_query: types.CallbackQuery, state: FSMContext):
     data = await state.get_data()
+    print(data)
     try:
         row_id = db_posts.insert(data['organization'], data['date'], data['description'], data['address'],
                                  float(data['location'].split()[1]), float(data['location'].split()[0]))
@@ -57,6 +58,7 @@ async def process_callback_save(callback_query: types.CallbackQuery, state: FSMC
         photo_path = f'media/pics/{row_id}.jpg'
         await data['media'].download(destination_file=photo_path)
         await callback_query.answer('Пост записан')
+        await state.finish()
     except Exception as e:
         print(f"Error occurred: {e}")
         await callback_query.answer('Не удалось записать данные')

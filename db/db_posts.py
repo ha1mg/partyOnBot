@@ -15,13 +15,10 @@ cur.close()
 def insert(organization,date,description,address,lat,lon):
     connection = sqlite3.connect(directory)
     cur = connection.cursor()
-    try:
-        cur.execute("INSERT INTO posts (organization,date,description,address,lat,lon) VALUES (?, ?, ?, ?, ?, ?)",
-                    (organization, date, description, address, lat, lon))
-        return cur.lastrowid
-    except sqlite3.IntegrityError as e:
-        return e
+    cur.execute("INSERT INTO posts (organization,date,description,address,lat,lon) VALUES (?, ?, ?, ?, ?, ?)",
+                (organization, date, description, address, lat, lon))
     connection.commit()
+    return cur.lastrowid
     cur.close()
 
 def fetch(post_id):
@@ -49,13 +46,14 @@ def nearest(lon, lat):
         distance = (((row[1]) - lat) ** 2 + ((row[2]) - lon) ** 2) ** 0.5
         data_dist.append([row[0], distance])
     sorted_dist = sorted(data_dist, key=lambda data: data[1])
-    return ','.join(str(item[0]) for item in sorted_dist) #В этом коде мы проходим по каждому элементу списка my_list и преобразуем его в строку с помощью str(item[0]). Затем мы используем метод join для объединения всех строк в одну строку, разделяя их запятой (',').
     connection.commit()
+    return ','.join(str(item[0]) for item in
+    sorted_dist)  # В этом коде мы проходим по каждому элементу списка my_list и преобразуем его в строку с помощью str(item[0]). Затем мы используем метод join для объединения всех строк в одну строку, разделяя их запятой (',').
     cur.close()
 
 def size():
     connection = sqlite3.connect(directory)
     cur = connection.cursor()
-    return len(cur.execute("SELECT * FROM posts").fetchall())
     connection.commit()
+    return len(cur.execute("SELECT * FROM posts").fetchall())
     cur.close()
