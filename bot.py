@@ -19,8 +19,9 @@ async def process_callback_next(callback_query: types.CallbackQuery):
         if db_users.fetch_iter(callback_query.from_user.id) >= db_posts.size():
             db_users.reset_iter(callback_query.from_user.id)
         data = db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])
+        photo = open(f'media/pics/{data[0]}.jpg', 'rb')
         await callback_query.answer_photo(
-            data[7], caption='*{0}*\n_{1}_\n\n{2}\n\n_{3}_'.format(data[1], data[2], data[3], data[4]),
+            photo, caption='*{0}*\n_{1}_\n\n{2}\n\n_{3}_'.format(data[1], data[2], data[3], data[4]),
             reply_markup=nav.back, parse_mode="Markdown")
         await bot.send_location(callback_query.from_user.id, data[5], data[6], reply_markup=nav.posts)
 
@@ -33,11 +34,11 @@ async def process_callback_favorite(callback_query: types.CallbackQuery):
                                 callback_query.from_user.id) == False:
             db_favourite.insert(db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[1],
                                 callback_query.from_user.id)
-            await callback_query.answer(
+            await callback_query.message.answer(
                 MESSAGES['favourite']
             )
         else:
-            await callback_query.answer(
+            await callback_query.message.answer(
                 MESSAGES['favourite_exist']
             )
 
@@ -62,8 +63,7 @@ async def handle_location(message:types.Message):
         near_loc = [int(x) for x in near_loc_str.split(",")]
         db_users.reset_iter(message.from_user.id)
         data = db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])
-        with open(f'media/pics/{data[0]}.jpg', 'rb') as photo_file:
-            photo = InputFile(photo_file)
+        photo = open(f'media/pics/{data[0]}.jpg', 'rb')
         await message.answer_photo(
                 photo, caption='*{0}*\n_{1}_\n\n{2}\n\n_{3}_'.format(data[1], data[2], data[3], data[4]),
                 reply_markup=nav.back, parse_mode="Markdown")
