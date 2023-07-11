@@ -1,16 +1,24 @@
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.dispatcher.filters import Text
 
-from config import TOKEN
+from config import TOKEN, partyOnChanelTest_id, channel_link
 import markups as nav
 import location as lc
 from db import db_posts, db_users, db_favourite, db_top
 from messages import MESSAGES
 
+
+
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 
-
+async def channel_sub(user_id):
+    status = ['creator', 'administrator', 'member']
+    channel1_сheck = await bot.get_chat_member(partyOnChanelTest_id, user_id)
+    if channel1_сheck.status in status:
+        return True
+    else:
+        return False
 
 @dp.callback_query_handler(Text('next'))
 async def process_callback_next(callback_query: types.CallbackQuery):
@@ -53,16 +61,33 @@ async def process_callback_favorite(callback_query: types.CallbackQuery):
                 MESSAGES['favourite_exist']
             )
 
+
+@dp.callback_query_handler(Text('start'))
+async def process_callback_start(callback_query: types.CallbackQuery):
+    if await channel_sub(callback_query.from_user.id) == True:
+        db_users.edit_state('start', callback_query.from_user.id)
+        await bot.send_message(
+            callback_query.from_user.id,
+            MESSAGES['start'].format(callback_query.from_user),
+            reply_markup=nav.mainMenu
+        )
+        if db_users.isExist(callback_query.from_user.id) == False:
+            db_users.insert(callback_query.from_user.id, str(callback_query.from_user.first_name))
+    else:
+        await bot.send_message(callback_query.from_user.id, 'пока не подписался')
 @dp.message_handler(commands=['start'])
 async def command_start(message: types.Message):
-    db_users.edit_state('start', message.from_user.id)
-    await bot.send_message(
-        message.from_user.id,
-        MESSAGES['start'].format(message.from_user),
-        reply_markup=nav.mainMenu
-    )
-    if db_users.isExist(message.from_user.id) == False:
-        db_users.insert(message.from_user.id, str(message.from_user.first_name))
+    if await channel_sub(message.chat.id) == True:
+        db_users.edit_state('start', message.from_user.id)
+        await bot.send_message(
+            message.from_user.id,
+            MESSAGES['start'].format(message.from_user),
+            reply_markup=nav.mainMenu
+            )
+        if db_users.isExist(message.from_user.id) == False:
+            db_users.insert(message.from_user.id, str(message.from_user.first_name))
+    else:
+        await bot.send_message(message.from_user.id, "Подпишись на канал для продолжения", reply_markup=nav.subscribes)
 
 @dp.message_handler(content_types=['location'])
 async def handle_location(message:types.Message):
