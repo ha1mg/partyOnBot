@@ -50,7 +50,7 @@ async def bot_message(message: types.Message, state: FSMContext):
 @dp.message_handler(state='*', text="Далее")
 async def bot_message(message: types.Message, state: FSMContext):
     await ManagerState.next()
-    data = state.get_data()
+    data = await state.get_data()
     cur_state = await state.get_state()
     cur_state_name = str(cur_state).split(':')[1]
     await message.answer(data[f'{cur_state_name}'], reply_markup=nav.nextField)
@@ -119,7 +119,7 @@ async def process_callback_save(callback_query: types.CallbackQuery, state: FSMC
         print(row_id)
         photo_path = f'media/pics/{row_id}.jpg'
         await data['media'].download(destination_file=photo_path)
-        await callback_query.message.answer('Пост записан')
+        await callback_query.message.answer('Пост записан', reply_markup=nav.mainMenu)
         await state.finish()
     except Exception as e:
         print(f"Error occurred: {e}")
@@ -128,17 +128,14 @@ async def process_callback_save(callback_query: types.CallbackQuery, state: FSMC
 
 @dp.callback_query_handler(Text('edit'), state=ManagerState.media)
 async def process_callback_edit(callback_query: types.CallbackQuery,  state: FSMContext):
+    ManagerState.organization.set()
     await callback_query.message.answer(MANAGER_MESSAGES['organization'])
-    data = state.get_data()
+    data = await state.get_data()
     cur_state = await state.get_state()
     cur_state_name = str(cur_state).split(':')[1]
     await callback_query.message.answer(data[f'{cur_state_name}'], reply_markup=nav.nextField)
     await ManagerState.organization.set()
-# @dp.message_handler()
-# async def bot_message(message: types.Message):
-#     if message.text == 'Новый пост':
-#         await message.answer(MANAGER_MESSAGES['organization'], reply_markup=manager_markups.cancel)
-#         await ManagerState.organization.set()
+
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)

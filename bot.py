@@ -1,6 +1,5 @@
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.dispatcher.filters import Text
-from aiogram.types import InputFile
 
 from config import TOKEN
 import markups as nav
@@ -20,7 +19,7 @@ async def process_callback_next(callback_query: types.CallbackQuery):
             db_users.reset_iter(callback_query.from_user.id)
         data = db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])
         photo = open(f'media/pics/{data[0]}.jpg', 'rb')
-        await callback_query.answer_photo(
+        await callback_query.message.answer_photo(
             photo, caption='*{0}*\n_{1}_\n\n{2}\n\n_{3}_'.format(data[1], data[2], data[3], data[4]),
             reply_markup=nav.back, parse_mode="Markdown")
         await bot.send_location(callback_query.from_user.id, data[5], data[6], reply_markup=nav.posts)
