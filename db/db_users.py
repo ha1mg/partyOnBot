@@ -56,6 +56,7 @@ def fetch_state(user_id):
     connection = sqlite3.connect(directory)
     cur = connection.cursor()
     data = cur.execute("SELECT state_name FROM users WHERE id = ?", (user_id,)).fetchone()
+    print(data)
     connection.commit()
     cur.close()
     return data[0]
@@ -79,6 +80,7 @@ def fetch_sorted_dist(user_id):
     connection = sqlite3.connect(directory)
     cur = connection.cursor()
     data = cur.execute("SELECT sorted_distance FROM users WHERE id = ?", (user_id,)).fetchone()
+    print (data)
     return data[0]
     connection.commit()
     cur.close()
