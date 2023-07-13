@@ -20,5 +20,8 @@ location = ReplyKeyboardMarkup(resize_keyboard=True).add(btnLocation, btnReturn)
 # --- Posts ---
 btnNext = InlineKeyboardButton('Другая', callback_data='next')
 btnLike = InlineKeyboardButton('В любимое', callback_data='favorite')
-posts = InlineKeyboardMarkup().add(btnNext, btnLike)
+btnEventLocation = InlineKeyboardButton('где это??', callback_data='location')
+btnReturnPost = InlineKeyboardButton('Меню', callback_data='back')
+posts = InlineKeyboardMarkup().add(btnNext, btnLike, btnEventLocation, btnReturnPost)
+
 
