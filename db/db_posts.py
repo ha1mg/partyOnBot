@@ -17,8 +17,8 @@ def convertToBinaryData(filename):
 # media_post_1 = convertToBinaryData(r'D:\PyProjects\aiogramBot\media\глеб1.jpg')
 # media_post_2 = convertToBinaryData(r'D:\PyProjects\aiogramBot\media\сергей1.jpg')
 # media_post_3 = convertToBinaryData(r'D:\PyProjects\aiogramBot\media\вова1.jpg')
-#cur.execute("INSERT INTO posts (organization,discription,address,lat,lon,date,media) VALUES (?, ?, ?, ?, ?, ?, ?)",
-#('Туса Глебовича',"Будет много Водки","Московская область, Лыткарино, микрорайон 4А, 3",55.589356,37.886205,"25.06.2023", media_post_1))
+# cur.execute("INSERT INTO posts (organization,discription,address,lat,lon,date,media) VALUES (?, ?, ?, ?, ?, ?, ?)",
+# ('Туса Глебовича',"Будет много Водки","Московская область, Лыткарино, микрорайон 4А, 3",55.589356,37.886205,"25.06.2023", media_post_1))
 # cur.execute("INSERT INTO posts (organization,discription,address,lat,lon,date,media) VALUES (?, ?, ?, ?, ?, ?, ?)",
 #             ('Туса Глебовича',"Будет много Водки","Московская область, Лыткарино, микрорайон 4А, 3",55.589356,37.886205,"25.06.2023", media_post_1))
 # cur.execute("INSERT INTO posts (organization,discription,address,lat,lon,date,media) VALUES (?, ?, ?, ?, ?, ?, ?)",

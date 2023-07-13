@@ -20,10 +20,9 @@ async def process_callback_next(callback_query: types.CallbackQuery):
             db_users.reset_iter(callback_query.from_user.id)
         data = db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])
         photo = open(f'media/pics/{data[0]}.jpg', 'rb')
-        await callback_query.answer_photo(
+        await callback_query.message.answer_photo(
             photo, caption='*{0}*\n_{1}_\n\n{2}\n\n_{3}_'.format(data[1], data[2], data[3], data[4]),
-            reply_markup=nav.back, parse_mode="Markdown")
-        await bot.send_location(callback_query.from_user.id, data[5], data[6], reply_markup=nav.posts)
+            reply_markup=nav.posts, parse_mode="Markdown")
 
 @dp.callback_query_handler(Text('favorite'))
 async def process_callback_favorite(callback_query: types.CallbackQuery):
@@ -41,7 +40,21 @@ async def process_callback_favorite(callback_query: types.CallbackQuery):
             await callback_query.message.answer(
                 MESSAGES['favourite_exist']
             )
+@dp.callback_query_handler(Text('location'))
+async def process_callback_event_location(callback_query: types.CallbackQuery):
+    near_loc_str = db_users.fetch_sorted_dist(callback_query.from_user.id)
+    near_loc = [int(x) for x in near_loc_str.split(",")]
+    data = db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])
+    await callback_query.message.answer_location(data[5], data[6])
 
+@dp.callback_query_handler(Text('back'))
+async def process_callback_menu(callback_query: types.CallbackQuery):
+    db_users.edit_state('start', callback_query.from_user.id)
+    await bot.send_message(
+        callback_query.from_user.id,
+        MESSAGES['menu'],
+        reply_markup=nav.mainMenu
+    )
 @dp.message_handler(commands=['start'])
 async def command_start(message: types.Message):
     db_users.edit_state('start', message.from_user.id)
@@ -66,8 +79,7 @@ async def handle_location(message:types.Message):
         photo = open(f'media/pics/{data[0]}.jpg', 'rb')
         await message.answer_photo(
                 photo, caption='*{0}*\n_{1}_\n\n{2}\n\n_{3}_'.format(data[1], data[2], data[3], data[4]),
-                reply_markup=nav.back, parse_mode="Markdown")
-        await bot.send_location(message.from_user.id, data[5], data[6], reply_markup=nav.posts)
+                reply_markup=nav.posts, parse_mode="Markdown")
 
 @dp.message_handler()
 async def bot_message(message: types.Message):
