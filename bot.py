@@ -1,24 +1,14 @@
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.dispatcher.filters import Text
+from aiogram.types import InputFile
 
-from config import TOKEN, partyOnChanelTest_id, channel_link
+from config import TOKEN
 import markups as nav
-import location as lc
 from db import db_posts, db_users, db_favourite, db_top
 from messages import MESSAGES
 
-
-
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
-
-async def channel_sub(user_id):
-    status = ['creator', 'administrator', 'member']
-    channel1_сheck = await bot.get_chat_member(partyOnChanelTest_id, user_id)
-    if channel1_сheck.status in status:
-        return True
-    else:
-        return False
 
 @dp.callback_query_handler(Text('next'))
 async def process_callback_next(callback_query: types.CallbackQuery):
@@ -28,21 +18,12 @@ async def process_callback_next(callback_query: types.CallbackQuery):
         db_users.increment_iter(callback_query.from_user.id)
         if db_users.fetch_iter(callback_query.from_user.id) >= db_posts.size():
             db_users.reset_iter(callback_query.from_user.id)
-        await bot.send_message(
-            callback_query.from_user.id,
-            '{0}\n{1}\n\n{2}\n\n{3}'.format(
-                db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[1],
-                db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[6],
-                db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[2],
-                db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[3]),
-            reply_markup=nav.back,
-            parse_mode="Markdown"
-        )
-        await bot.send_photo(callback_query.from_user.id, db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[7])
-        await bot.send_location(callback_query.from_user.id,
-                                db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[4],
-                                db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[5],
-                                reply_markup=nav.posts)
+        data = db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])
+        photo = open(f'media/pics/{data[0]}.jpg', 'rb')
+        await callback_query.answer_photo(
+            photo, caption='*{0}*\n_{1}_\n\n{2}\n\n_{3}_'.format(data[1], data[2], data[3], data[4]),
+            reply_markup=nav.back, parse_mode="Markdown")
+        await bot.send_location(callback_query.from_user.id, data[5], data[6], reply_markup=nav.posts)
 
 @dp.callback_query_handler(Text('favorite'))
 async def process_callback_favorite(callback_query: types.CallbackQuery):
@@ -53,41 +34,24 @@ async def process_callback_favorite(callback_query: types.CallbackQuery):
                                 callback_query.from_user.id) == False:
             db_favourite.insert(db_posts.fetch(near_loc[db_users.fetch_iter(callback_query.from_user.id)])[1],
                                 callback_query.from_user.id)
-            await callback_query.answer(
+            await callback_query.message.answer(
                 MESSAGES['favourite']
             )
         else:
-            await callback_query.answer(
+            await callback_query.message.answer(
                 MESSAGES['favourite_exist']
             )
 
-
-@dp.callback_query_handler(Text('start'))
-async def process_callback_start(callback_query: types.CallbackQuery):
-    if await channel_sub(callback_query.from_user.id) == True:
-        db_users.edit_state('start', callback_query.from_user.id)
-        await bot.send_message(
-            callback_query.from_user.id,
-            MESSAGES['start'].format(callback_query.from_user),
-            reply_markup=nav.mainMenu
-        )
-        if db_users.isExist(callback_query.from_user.id) == False:
-            db_users.insert(callback_query.from_user.id, str(callback_query.from_user.first_name))
-    else:
-        await bot.send_message(callback_query.from_user.id, 'пока не подписался')
 @dp.message_handler(commands=['start'])
 async def command_start(message: types.Message):
-    if await channel_sub(message.chat.id) == True:
-        db_users.edit_state('start', message.from_user.id)
-        await bot.send_message(
-            message.from_user.id,
-            MESSAGES['start'].format(message.from_user),
-            reply_markup=nav.mainMenu
-            )
-        if db_users.isExist(message.from_user.id) == False:
-            db_users.insert(message.from_user.id, str(message.from_user.first_name))
-    else:
-        await bot.send_message(message.from_user.id, "Подпишись на канал для продолжения", reply_markup=nav.subscribes)
+    db_users.edit_state('start', message.from_user.id)
+    await bot.send_message(
+        message.from_user.id,
+        MESSAGES['start'].format(message.from_user),
+        reply_markup=nav.mainMenu
+    )
+    if db_users.isExist(message.from_user.id) == False:
+        db_users.insert(message.from_user.id, str(message.from_user.first_name))
 
 @dp.message_handler(content_types=['location'])
 async def handle_location(message:types.Message):
@@ -97,25 +61,13 @@ async def handle_location(message:types.Message):
         db_users.recording_coords(lon, lat, message.from_user.id)
         near_loc_str = db_users.fetch_sorted_dist(message.from_user.id)
         near_loc = [int(x) for x in near_loc_str.split(",")]
-
         db_users.reset_iter(message.from_user.id)
-
-        await bot.send_message(
-            message.from_user.id,
-            '{0}\n{1}\n\n{2}\n\n{3}'.format(
-                db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[1],
-                db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[6],
-                db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[2],
-                db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[3]),
-            reply_markup=nav.back,
-            parse_mode="Markdown")
-        await bot.send_photo(message.from_user.id,
-                             db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[7])
-        await bot.send_location(
-            message.from_user.id,
-            db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[4],
-            db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])[5],
-            reply_markup=nav.posts)
+        data = db_posts.fetch(near_loc[db_users.fetch_iter(message.from_user.id)])
+        photo = open(f'media/pics/{data[0]}.jpg', 'rb')
+        await message.answer_photo(
+                photo, caption='*{0}*\n_{1}_\n\n{2}\n\n_{3}_'.format(data[1], data[2], data[3], data[4]),
+                reply_markup=nav.back, parse_mode="Markdown")
+        await bot.send_location(message.from_user.id, data[5], data[6], reply_markup=nav.posts)
 
 @dp.message_handler()
 async def bot_message(message: types.Message):
@@ -160,6 +112,10 @@ async def bot_message(message: types.Message):
                 MESSAGES['menu'],
                 reply_markup=nav.mainMenu
             )
+
+@dp.message_handler()
+async def echo_message(msg: types.Message):
+    await bot.send_message(msg.from_user.id, msg.text)
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)

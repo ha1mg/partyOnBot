@@ -55,7 +55,9 @@ def insert(organization, discription, x, y):
     cur.execute("INSERT INTO posts (organization, discription, lat, lon) VALUES (?, ?, ?, ?)",
                 (organization, discription, x, y))
     connection.commit()
+    result = cur.lastrowid
     cur.close()
+    return result
 
 def fetch(post_id):
     connection = sqlite3.connect(directory)
@@ -85,10 +87,14 @@ def nearest(lon, lat):
     return ','.join(str(item[0]) for item in sorted_dist) #В этом коде мы проходим по каждому элементу списка my_list и преобразуем его в строку с помощью str(item[0]). Затем мы используем метод join для объединения всех строк в одну строку, разделяя их запятой (',').
     connection.commit()
     cur.close()
+    return ','.join(str(item[0]) for item in sorted_dist)  # В этом коде мы проходим по каждому элементу списка my_list и преобразуем его в строку с помощью str(item[0]). Затем мы используем метод join для объединения всех строк в одну строку, разделяя их запятой (',').
 
 def size():
     connection = sqlite3.connect(directory)
     cur = connection.cursor()
     return len(cur.execute("SELECT * FROM posts").fetchall())
     connection.commit()
+    result = len(cur.execute("SELECT * FROM posts").fetchall())
     cur.close()
+    return result
+
