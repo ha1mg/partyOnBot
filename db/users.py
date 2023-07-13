@@ -1,5 +1,5 @@
 import sqlite3
-from db import db_posts
+from db import posts
 from config import DIRECTORY
 
 directory = r'{0}\users.db'.format(DIRECTORY)
@@ -70,7 +70,7 @@ def edit_state(new_state, user_id):
 def recording_coords(lon, lat, user_id):
     connection = sqlite3.connect(directory)
     cur = connection.cursor()
-    sorted_dist = db_posts.nearest(lon, lat)
+    sorted_dist = posts.nearest(lon, lat)
     cur.execute("UPDATE users SET lon = ?, lat = ?, sorted_distance = ? WHERE id = ?", (lon, lat, sorted_dist, user_id))
     connection.commit()
     cur.close()

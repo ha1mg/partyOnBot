@@ -4,34 +4,29 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 import manager_markups
 from ManagerState import ManagerState
-from config import MANAGER_TOKEN
+from config import MANAGER_TOKEN, ADMIN_ID
 from messages import MANAGER_MESSAGES
 import manager_markups as nav
 import time
 import location
-from db import db_posts
+from db import managers, posts
 
 bot = Bot(token=MANAGER_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
-
-# @dp.message_handler(state=ManagerState.media, content_types=['video', 'video_note'])
-# async def get_video(message: types.Message, state: FSMContext):
-#     await state.update_data(info=[message.effective_attachment.file_id])
-#     await message.answer('Еще?')
-
-# @dp.callback_query_handler(Text('edit'))
-# async def process_callback_edit(callback_query: types.CallbackQuery):
-
-
-@dp.message_handler(commands=['start'], state='*')
+@dp.message_handler(commands=['start'])
 async def command_start(message: types.Message, state: FSMContext):
     await state.finish()
-    await message.answer(
-        MANAGER_MESSAGES['start'].format(message.from_user),
-        reply_markup=nav.mainMenu
-    )
+    if message.from_user.id in managers.fetch_id() or message.from_user.id in ADMIN_ID:
+        await message.answer(
+            MANAGER_MESSAGES['start'].format(message.from_user),
+            reply_markup=nav.mainMenu
+        )
+    else:
+        await message.answer(
+            'Я тебя не знаю'
+        )
 
 
 @dp.message_handler()
@@ -47,13 +42,15 @@ async def bot_message(message: types.Message, state: FSMContext):
     await message.answer('Действие отменено', reply_markup=nav.mainMenu)
 
 
-@dp.message_handler(state='*', text="Далее")
-async def bot_message(message: types.Message, state: FSMContext):
-    await ManagerState.next()
-    data = await state.get_data()
-    cur_state = await state.get_state()
-    cur_state_name = str(cur_state).split(':')[1]
-    await message.answer(data[f'{cur_state_name}'], reply_markup=nav.nextField)
+# @dp.message_handler(state='media', text="Далее")
+# async def bot_message(message: types.Message, state: FSMContext):
+#     await ManagerState.next()
+#     data = await state.get_data()
+#     await message.answer(MANAGER_MESSAGES['media'])
+#     await message.answer_photo(data['media'], reply_markup=nav.post)
+
+
+
 
 
 @dp.message_handler(state=ManagerState.organization)
@@ -109,14 +106,17 @@ async def get_photo_error(message: types.Message):
     await message.answer(MANAGER_MESSAGES['media_error'])
 
 
+@dp.message_handler(state=ManagerState.edit_media, content_types='any')
+async def get_photo_error(message: types.Message):
+    await message.answer(MANAGER_MESSAGES['media_error'])
+
+
 @dp.callback_query_handler(Text('save'), state=ManagerState.media)
 async def process_callback_save(callback_query: types.CallbackQuery, state: FSMContext):
     data = await state.get_data()
-    print(data)
     try:
-        row_id = db_posts.insert(data['organization'], data['date'], data['description'], data['address'],
+        row_id = posts.insert(data['organization'], data['date'], data['description'], data['address'],
                                  float(data['location'].split()[1]), float(data['location'].split()[0]))
-        print(row_id)
         photo_path = f'media/pics/{row_id}.jpg'
         await data['media'].download(destination_file=photo_path)
         await callback_query.message.answer('Пост записан', reply_markup=nav.mainMenu)
@@ -128,13 +128,74 @@ async def process_callback_save(callback_query: types.CallbackQuery, state: FSMC
 
 @dp.callback_query_handler(Text('edit'), state=ManagerState.media)
 async def process_callback_edit(callback_query: types.CallbackQuery,  state: FSMContext):
-    ManagerState.organization.set()
-    await callback_query.message.answer(MANAGER_MESSAGES['organization'])
+    await ManagerState.edit_organization.set()
     data = await state.get_data()
-    cur_state = await state.get_state()
-    cur_state_name = str(cur_state).split(':')[1]
-    await callback_query.message.answer(data[f'{cur_state_name}'], reply_markup=nav.nextField)
-    await ManagerState.organization.set()
+    # cur_state = await state.get_state()
+    # cur_state_name = str(cur_state).split(':')[1]
+    await callback_query.message.answer(MANAGER_MESSAGES['organization'])
+    await callback_query.message.answer(data['organization'], reply_markup=nav.nextField)
+
+
+@dp.message_handler(state=ManagerState.edit_organization)
+async def edit_organization(message: types.Message, state: FSMContext):
+    if message.text != '\u23E9':
+        await state.update_data(organization=message.text)
+    await message.answer(MANAGER_MESSAGES['date'])
+    data = await state.get_data()
+    await message.answer(data['date'], reply_markup=nav.nextField)
+    await ManagerState.edit_date.set()
+
+
+@dp.message_handler(state=ManagerState.edit_date)
+async def get_date(message: types.Message, state: FSMContext):
+    try:
+        if message.text != '\u23E9':
+            time.strptime(message.text, '%d.%m.%Y')
+            await state.update_data(date=message.text)
+        await message.answer(MANAGER_MESSAGES['description'])
+        data = await state.get_data()
+        await message.answer(data['description'], reply_markup=nav.nextField)
+        await ManagerState.edit_description.set()
+    except ValueError:
+        await message.answer(MANAGER_MESSAGES['date_error'])
+
+
+@dp.message_handler(state=ManagerState.edit_description)
+async def get_description(message: types.Message, state: FSMContext):
+    if message.text != '\u23E9':
+        await state.update_data(description=message.text)
+    await message.answer(MANAGER_MESSAGES['address'])
+    data = await state.get_data()
+    await message.answer(data['address'], reply_markup=nav.nextField)
+    await ManagerState.edit_address.set()
+
+
+@dp.message_handler(state=ManagerState.edit_address)
+async def get_address(message: types.Message, state: FSMContext):
+    try:
+        if message.text != '\u23E9':
+            await state.update_data(location=location.get_coords_from_address(message.text))
+            await state.update_data(address=message.text)
+        await message.answer(MANAGER_MESSAGES['media'])
+        data = await state.get_data()
+        await message.answer_photo(data['media'].file_id, reply_markup=nav.nextField)
+        await ManagerState.edit_media.set()
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        await message.answer(MANAGER_MESSAGES['address_error'])
+
+
+@dp.message_handler(state=ManagerState.edit_media, content_types='photo')
+async def get_photo(message: types.Message, state: FSMContext):
+    if message.text != '\u23E9':
+        await state.update_data(media=message.photo[-1])
+    data = await state.get_data()
+    await message.answer_photo(data['media'].file_id,
+                               caption='*{0}*\n_{1}_\n\n{2}\n\n_{3}_'.format(
+                                   data['organization'], data['date'], data['description'], data['address']),
+                               parse_mode="Markdown")
+    await message.answer_location(data['location'].split()[1], data['location'].split()[0], reply_markup=nav.post)
+
 
 
 if __name__ == '__main__':

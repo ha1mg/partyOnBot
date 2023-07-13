@@ -3,7 +3,7 @@ from aiogram.dispatcher.filters import Text
 
 from config import TOKEN
 import markups as nav
-from db import db_posts, db_users, db_favourite, db_top
+from db import posts, users, favourite, top
 from messages import MESSAGES
 
 bot = Bot(token=TOKEN)

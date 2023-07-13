@@ -6,3 +6,8 @@ class ManagerState(StatesGroup):
     description = State()
     address = State()
     media = State()
+    edit_organization = State()
+    edit_date = State()
+    edit_description = State()
+    edit_address = State()
+    edit_media = State()
