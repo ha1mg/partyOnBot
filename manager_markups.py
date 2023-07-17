@@ -11,5 +11,5 @@ post = InlineKeyboardMarkup().add(btnSave, btnEdit)
 btnCancel = KeyboardButton('Отмена')
 cancel = ReplyKeyboardMarkup(resize_keyboard=True).add(btnCancel)
 
-btnNext = KeyboardButton('Далее')
-nextField = ReplyKeyboardMarkup(resize_keyboard=True).add(btnNext)
+btnNext = InlineKeyboardButton('Далее', callback_data='next')
+nextField = InlineKeyboardMarkup().add(btnNext)
