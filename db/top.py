@@ -3,21 +3,18 @@ from config import DIRECTORY
 
 directory = r'{0}\top.db'.format(DIRECTORY)
 connection = sqlite3.connect(directory)
-cur = connection.cursor()
+cursor = connection.cursor()
 
-cur.execute('''CREATE TABLE IF NOT EXISTS top (id_post INTEGER NOT NULL);''')
-
-# cur.execute("INSERT INTO top (id_post) VALUES (?)", (1,))
-# cur.execute("INSERT INTO top (id_post) VALUES (?)", (2,))
-# cur.execute("INSERT INTO top (id_post) VALUES (?)", (3,))
+cursor.execute('''CREATE TABLE IF NOT EXISTS top (id_post INTEGER NOT NULL);''')
 
 connection.commit()
-cur.close()
+cursor.close()
+connection.close()
 
 def fetch():
-    connection = sqlite3.connect(directory)
-    cur = connection.cursor()
+    con = sqlite3.connect(directory)
+    cur = con.cursor()
     data = cur.execute("SELECT id_post FROM top").fetchall()
-    connection.commit()
     cur.close()
+    con.close()
     return data

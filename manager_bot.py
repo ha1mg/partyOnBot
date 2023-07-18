@@ -52,7 +52,7 @@ async def get_organization(message: types.Message, state: FSMContext):
 @dp.message_handler(state=ManagerState.date)
 async def get_date(message: types.Message, state: FSMContext):
     try:
-        time.strptime(message.text, '%d.%m.%Y')
+        time.strptime(message.text, '%Y-%m-%d')
         await state.update_data(date=message.text)
         await message.answer(MANAGER_MESSAGES['description'])
         await ManagerState.description.set()

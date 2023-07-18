@@ -7,6 +7,7 @@ from messages import MESSAGES
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 
+
 @dp.callback_query_handler(text='next')
 async def process_callback_next(callback_query: types.CallbackQuery):
     if users.fetch_state(callback_query.from_user.id) == 'nearest':
@@ -22,15 +23,16 @@ async def process_callback_next(callback_query: types.CallbackQuery):
             photo, caption='*{0}*\n_{1}_\n\n{2}\n\n_{3}_'.format(data[1], data[2], data[3], data[4]),
             reply_markup=nav.posts, parse_mode="Markdown")
 
+
 @dp.callback_query_handler(text='favorite')
 async def process_callback_favorite(callback_query: types.CallbackQuery):
     if users.fetch_state(callback_query.from_user.id) == 'nearest':
         near_loc_str = users.fetch_sorted_dist(callback_query.from_user.id)
         near_loc = [int(x) for x in near_loc_str.split(",")]
-        if favourite.is_exist(posts.fetch(near_loc[users.fetch_iter(callback_query.from_user.id)])[1],
-                                callback_query.from_user.id) == False:
+        if not favourite.is_exist(posts.fetch(near_loc[users.fetch_iter(
+                callback_query.from_user.id)])[1], callback_query.from_user.id):
             favourite.insert(posts.fetch(near_loc[users.fetch_iter(callback_query.from_user.id)])[1],
-                                callback_query.from_user.id)
+                             callback_query.from_user.id)
             await callback_query.message.answer(
                 MESSAGES['favourite']
             )
@@ -38,6 +40,7 @@ async def process_callback_favorite(callback_query: types.CallbackQuery):
             await callback_query.message.answer(
                 MESSAGES['favourite_exist']
             )
+
 
 @dp.message_handler(commands=['start'])
 async def command_start(message: types.Message):
@@ -47,7 +50,7 @@ async def command_start(message: types.Message):
         MESSAGES['start'].format(message.from_user),
         reply_markup=nav.mainMenu
     )
-    if users.is_exist(message.from_user.id) == False:
+    if not users.is_exist(message.from_user.id):
         users.insert(message.from_user.id, str(message.from_user.first_name))
 
 
@@ -85,6 +88,7 @@ async def handle_location(message: types.Message):
             photo, caption='*{0}*\n_{1}_\n\n{2}\n\n_{3}_'.format(data[1], data[2], data[3], data[4]),
             reply_markup=nav.posts, parse_mode="Markdown")
 
+
 @dp.message_handler()
 async def bot_message(message: types.Message):
     if users.fetch_state(message.from_user.id) == 'start':
@@ -120,7 +124,8 @@ async def bot_message(message: types.Message):
                     MESSAGES['favourite_null'],
                     reply_markup=nav.back
                 )
-    elif users.fetch_state(message.from_user.id) == 'top' or users.fetch_state(message.from_user.id) == 'favoirite' or users.fetch_state(message.from_user.id) == 'nearest':
+    elif users.fetch_state(message.from_user.id) == 'top' or users.fetch_state(
+            message.from_user.id) == 'favoirite' or users.fetch_state(message.from_user.id) == 'nearest':
         if message.text == '🏠':
             users.edit_state('start', message.from_user.id)
             await bot.send_message(
@@ -129,10 +134,11 @@ async def bot_message(message: types.Message):
                 reply_markup=nav.mainMenu
             )
 
+
 @dp.message_handler()
 async def echo_message(msg: types.Message):
     await bot.send_message(msg.from_user.id, msg.text)
 
+
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
-
