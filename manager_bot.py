@@ -95,7 +95,7 @@ async def get_photo_error(message: types.Message):
     await message.answer(MANAGER_MESSAGES['media_error'])
 
 
-@dp.callback_query_handler(state='*', text='save')
+@dp.callback_query_handler(state=ManagerState.media, text='save')
 async def process_callback_save(callback_query: types.CallbackQuery, state: FSMContext):
     data = await state.get_data()
     try:
@@ -110,7 +110,7 @@ async def process_callback_save(callback_query: types.CallbackQuery, state: FSMC
         await callback_query.answer('Не удалось записать данные')
 
 
-@dp.callback_query_handler(state='*', text='edit')
+@dp.callback_query_handler(state=ManagerState.media, text='edit')
 async def process_callback_edit(callback_query: types.CallbackQuery,  state: FSMContext):
     await ManagerState.edit_organization.set()
     data = await state.get_data()
@@ -217,6 +217,29 @@ async def edit_photo(message: types.Message, state: FSMContext):
 @dp.message_handler(state=ManagerState.edit_media, content_types='any')
 async def edit_photo_error(message: types.Message):
     await message.answer(MANAGER_MESSAGES['media_error'])
+
+
+@dp.callback_query_handler(state=ManagerState.edit_media, text='save')
+async def process_callback_save(callback_query: types.CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    try:
+        row_id = posts.insert(data['organization'], data['date'], data['description'], data['address'],
+                              float(data['location'].split()[1]), float(data['location'].split()[0]))
+        photo_path = f'media/pics/{row_id}.jpg'
+        await data['media'].download(destination_file=photo_path)
+        await callback_query.message.answer('Пост записан', reply_markup=nav.mainMenu)
+        await state.finish()
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        await callback_query.answer('Не удалось записать данные')
+
+
+@dp.callback_query_handler(state=ManagerState.edit_media, text='edit')
+async def process_callback_edit(callback_query: types.CallbackQuery,  state: FSMContext):
+    await ManagerState.edit_organization.set()
+    data = await state.get_data()
+    await callback_query.message.answer(f'{MANAGER_MESSAGES["organization"]}\n\n{data["organization"]}',
+                                        reply_markup=nav.nextField)
 
 
 if __name__ == '__main__':
