@@ -4,11 +4,9 @@ from config import DIRECTORY
 directory = r'{0}\posts.db'.format(DIRECTORY)
 connection = sqlite3.connect(directory)
 cur = connection.cursor()
-
 cur.execute('''CREATE TABLE IF NOT EXISTS posts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,organization TEXT NOT NULL,date TEXT NOT NULL,
             description TEXT NOT NULL,address TEXT NOT NULL,lat FLOAT NOT NULL,lon FLOAT NOT NULL,media_id TEXT);''')
-
 connection.commit()
 cur.close()
 
