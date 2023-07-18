@@ -4,6 +4,6 @@ APIKEY = "555bc789-2362-40fb-bfbf-c7c01038f989"
 ADMIN_ID = [437835498, 1068847837]
 PARTY_ON_CHANEL_ID = -1001962988409
 CHANNEL_LINK = 'https://t.me/PartyONChannelTEST'
-DIRECTORY = r'D:\Projects\aiogramBot\db'
+DIRECTORY = r'C:\Users\Filipp\Desktop\aiogramBot\db'
 
 

@@ -27,3 +27,7 @@ posts = InlineKeyboardMarkup().add(btnNext, btnLike, btnEventLocation, btnReturn
 btnChanel1 = InlineKeyboardButton(text='Канал #1', url=CHANNEL_LINK)
 btnIsSubscribe = InlineKeyboardButton(text='Подписался!', callback_data='start')
 subscribes = InlineKeyboardMarkup(row_width=1).add(btnChanel1, btnIsSubscribe)
+
+# --- user location ---
+btnNewUserLocation = KeyboardButton('Оставить старую')
+userLocation = ReplyKeyboardMarkup(resize_keyboard=True).add(btnNewUserLocation, btnLocation, btnReturn)

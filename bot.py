@@ -11,7 +11,7 @@ dp = Dispatcher(bot)
 @dp.callback_query_handler(text='next')
 async def process_callback_next(callback_query: types.CallbackQuery):
     if users.fetch_state(callback_query.from_user.id) == 'nearest':
-        near_loc_str = users.fetch_sorted_dist(callback_query.from_user.id)
+        near_loc_str = users.fetch_sorted_posts(callback_query.from_user.id)
         near_loc = [int(x) for x in near_loc_str.split(",")]
         users.increment_iter(callback_query.from_user.id)
         if users.fetch_iter(callback_query.from_user.id) >= posts.size():
@@ -27,7 +27,7 @@ async def process_callback_next(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(text='favorite')
 async def process_callback_favorite(callback_query: types.CallbackQuery):
     if users.fetch_state(callback_query.from_user.id) == 'nearest':
-        near_loc_str = users.fetch_sorted_dist(callback_query.from_user.id)
+        near_loc_str = users.fetch_sorted_posts(callback_query.from_user.id)
         near_loc = [int(x) for x in near_loc_str.split(",")]
         if not favourite.is_exist(posts.fetch(near_loc[users.fetch_iter(
                 callback_query.from_user.id)])[1], callback_query.from_user.id):
@@ -56,7 +56,7 @@ async def command_start(message: types.Message):
 
 @dp.callback_query_handler(text='location')
 async def process_callback_event_location(callback_query: types.CallbackQuery):
-    near_loc_str = users.fetch_sorted_dist(callback_query.from_user.id)
+    near_loc_str = users.fetch_sorted_posts(callback_query.from_user.id)
     near_loc = [int(x) for x in near_loc_str.split(",")]
     data = posts.fetch(near_loc[users.fetch_iter(callback_query.from_user.id)])
     await callback_query.message.answer_location(data[5], data[6])
@@ -77,8 +77,7 @@ async def handle_location(message: types.Message):
     if users.fetch_state(message.from_user.id) == 'nearest':
         lat = message.location.latitude
         lon = message.location.longitude
-        users.recording_coords(lon, lat, message.from_user.id)
-        near_loc_str = users.fetch_sorted_dist(message.from_user.id)
+        near_loc_str = users.recording_cords(lon, lat, message.from_user.id)
         near_loc = [int(x) for x in near_loc_str.split(",")]
         users.reset_iter(message.from_user.id)
         data = posts.fetch(near_loc[users.fetch_iter(message.from_user.id)])
@@ -88,17 +87,23 @@ async def handle_location(message: types.Message):
             photo, caption='*{0}*\n_{1}_\n\n{2}\n\n_{3}_'.format(data[1], data[2], data[3], data[4]),
             reply_markup=nav.posts, parse_mode="Markdown")
 
-
 @dp.message_handler()
 async def bot_message(message: types.Message):
     if users.fetch_state(message.from_user.id) == 'start':
         if message.text == '🔍':
             users.edit_state('nearest', message.from_user.id)
-            await message.answer(
-                MESSAGES['location'],
-                reply_markup=nav.location,
-                parse_mode="Markdown"
-            )
+            if users.user_have_location(message.from_user.id) == True:
+                await message.answer(
+                    MESSAGES['have_location'],
+                    reply_markup=nav.userLocation,
+                    parse_mode="Markdown"
+                )
+            else:
+                await message.answer(
+                    MESSAGES['location'],
+                    reply_markup=nav.location,
+                    parse_mode="Markdown"
+                )
         elif message.text == '🔝':
             users.edit_state('top', message.from_user.id)
             data = top.fetch()
@@ -124,6 +129,18 @@ async def bot_message(message: types.Message):
                     MESSAGES['favourite_null'],
                     reply_markup=nav.back
                 )
+    elif users.fetch_state(message.from_user.id) == 'nearest':
+        if message.text == 'Оставить старую':
+            near_loc_str = users.calc_sorted_posts(message.from_user.id)
+            near_loc = [int(x) for x in near_loc_str.split(",")]
+            users.reset_iter(message.from_user.id)
+            data = posts.fetch(near_loc[users.fetch_iter(message.from_user.id)])
+            photo = open(f'media/pics/{data[0]}.jpg', 'rb')
+            await message.answer('Почти у дома:', reply_markup=types.ReplyKeyboardRemove())
+            await message.answer_photo(
+                photo, caption='*{0}*\n_{1}_\n\n{2}\n\n_{3}_'.format(data[1], data[2], data[3], data[4]),
+                reply_markup=nav.posts, parse_mode="Markdown")
+
     elif users.fetch_state(message.from_user.id) == 'top' or users.fetch_state(
             message.from_user.id) == 'favoirite' or users.fetch_state(message.from_user.id) == 'nearest':
         if message.text == '🏠':
@@ -133,6 +150,8 @@ async def bot_message(message: types.Message):
                 MESSAGES['menu'],
                 reply_markup=nav.mainMenu
             )
+
+
 
 
 @dp.message_handler()
